@@ -3,8 +3,8 @@
 
 | Atribut | Nilai |
 | --- | --- |
-| Versi | 1.0 |
-| Status | Keputusan stack utama terkunci (ADR-09/10/11) — belum ada baris kode yang ditulis |
+| Versi | 1.2 |
+| Status | Seluruh keputusan stack terkunci (ADR-09…ADR-18) — kerangka proyek sedang dibangun |
 | Sumber | `srs-app.md` v1.4 · `docs/prd-rental-alat-camping.md` v1.0 |
 
 ### Legenda
@@ -449,38 +449,42 @@ pengujian manual sesekali.
 | **ADR-09** | **JavaScript** (bukan TypeScript) | **Diputuskan pemilik produk, 28 Sep 2026** | Tanpa pemeriksaan tipe statis: wajib JSDoc pada service, konstanta status bekukan (frozen object) untuk mencegah salah ketik, dan validasi runtime di batas API |
 | **ADR-10** | **Penguncian stok pesimistik** — transaksi + `SELECT ... FOR UPDATE` | **Diputuskan pemilik produk, 28 Sep 2026**; `OBJ-02` menuntut nol *double-booking* | Ada penantian singkat saat rebutan; kueri ketersediaan harus berada di dalam transaksi yang sama dengan pembuatan reservasi; transaksi wajib pendek |
 | **ADR-11** | **Midtrans** sebagai payment gateway | **Diputuskan pemilik produk, 28 Sep 2026** | Bergantung pada SDK & format webhook Midtrans; signature diverifikasi menurut spesifikasi Midtrans; kredensial sandbox dan produksi wajib dipisah |
+| **ADR-12** | **Knex** untuk migrasi & query builder | **Diputuskan 28 Sep 2026**; ADR-10 menuntut transaksi eksplisit + `FOR UPDATE`, dan Knex mendukungnya matang sementara SQL tetap terbaca | SQL ditulis eksplisit di `repository/`; migrasi berversi di `migrations/`; tidak memakai ORM penuh |
+| **ADR-13** | **Object storage (S3-compatible)** untuk media alat | **Diputuskan 28 Sep 2026**; `REQ-4.3.1` menuntut video — berkas besar tidak cocok di disk VPS | Butuh kredensial penyedia object storage; unggahan tidak boleh melewati proses backend untuk berkas besar (gunakan *presigned URL*) |
+| **ADR-14** | **JWT: akses 15 menit · refresh 7 hari · reset 30 menit** | **Diputuskan 28 Sep 2026**; `REQ-5.3` menuntut masa berlaku "terbatas" yang belum punya angka, sehingga tidak testable | Perlu mekanisme *refresh* dan pencabutan token saat logout/reset kata sandi |
+| **ADR-15** | **`node-cron` di dalam proses** untuk scheduler | **Diputuskan 28 Sep 2026**; volume rendah & deployment tunggal | Job akan ganda bila instans diperbanyak — catat sebagai utang teknis |
+| **ADR-16** | **Vite SPA, tanpa SSR** | **Diputuskan 28 Sep 2026**; SEO bukan requirement | Berkas statis hasil build disajikan reverse proxy; tidak ada server Node untuk frontend |
+| **ADR-17** | **React Context** untuk auth & keranjang | **Diputuskan 28 Sep 2026**; skala state kecil | Bila state membengkak, tambah pustaka khusus — jangan paksakan Context |
+| **ADR-18** | **Deploy manual, tes otomatis sebelum rilis** | **Diputuskan 28 Sep 2026**; skala proyek belum menuntut pipeline | Perlu disiplin manual: jalankan tes sebelum setiap deploy |
 
 ---
 
-## 10. Pertanyaan Terbuka Arsitektur
+## 10. Status Keputusan Arsitektur
 
-### 10.1 Tiga Keputusan Sudah Dikunci
+### 10.1 Sudah Dikunci
 
-Diputuskan pemilik produk pada 28 September 2026, dan sudah dipindahkan ke §9 sebagai ADR:
+Diputuskan pemilik produk pada 28 September 2026, seluruhnya sudah dipindahkan ke §9:
 
 | Pertanyaan | Jawaban | ADR |
 | --- | --- | --- |
-| Bahasa: JavaScript atau TypeScript? | **JavaScript** | ADR-09 |
-| Strategi penguncian stok? | **Pesimistik** — transaksi + `SELECT ... FOR UPDATE` | ADR-10 |
-| Payment gateway mana? | **Midtrans** | ADR-11 |
+| Bahasa: JavaScript atau TypeScript? | JavaScript | ADR-09 |
+| Strategi penguncian stok? | Pesimistik — transaksi + `SELECT ... FOR UPDATE` | ADR-10 |
+| Payment gateway mana? | Midtrans | ADR-11 |
+| Pustaka migrasi & query? | Knex | ADR-12 |
+| Penyimpanan media (foto/video)? | Object storage (S3-compatible) | ADR-13 |
+| Masa berlaku JWT? | Akses 15 mnt · refresh 7 hari · reset 30 mnt | ADR-14 |
+| Scheduler? | `node-cron` dalam proses | ADR-15 |
+| Perlu SSR? | Tidak — Vite SPA | ADR-16 |
+| *State management* frontend? | React Context | ADR-17 |
+| CI/CD atau deploy manual? | Deploy manual; tes otomatis dijalankan sebelum rilis | ADR-18 |
 
 ### 10.2 Masih Terbuka
 
-**Jangan mulai menulis kode sebelum butir 1–4 terjawab.**
+Hanya satu, dan tidak menghambat penulisan kode:
 
-| # | Pertanyaan | Mengapa Penting | Usulan |
+| # | Pertanyaan | Dampak | Catatan |
 | --- | --- | --- | --- |
-| 1 | Pustaka migrasi & query: Knex, Sequelize, Prisma, atau SQL langsung? | Memengaruhi aturan "SQL hanya di repository" (§3) — dan **dengan ADR-10, wajib mendukung transaksi eksplisit + `FOR UPDATE`**. Ini mengeliminasi sebagian pilihan | `[USULAN]` Knex — dukungan transaksi matang, SQL tetap eksplisit |
-| 2 | Penyimpanan media (foto/video alat) di mana? | `REQ-4.3.1` menuntut **video** — berkas besar, mahal di disk VPS | `[USULAN]` Object storage (mis. S3-compatible), bukan disk VPS |
-| 3 | Masa berlaku JWT akses, refresh, dan token reset kata sandi? | `REQ-5.3` menuntut "terbatas" — tidak testable tanpa angka | `[USULAN]` Akses 15 mnt · refresh 7 hari · reset 30 mnt |
-| 4 | Scheduler: `node-cron` dalam proses, atau proses terpisah? | Menentukan deployment & risiko job ganda | `[USULAN]` Dalam proses untuk rilis pertama |
-| 5 | Perlu SSR (*server-side rendering*)? | Menentukan Vite SPA vs Next.js, dan struktur `frontend/` | `[USULAN]` Tidak — SEO bukan requirement |
-| 6 | *State management* frontend: Context, Redux, atau Zustand? | Menentukan struktur `frontend/src/` | `[USULAN]` Context untuk auth + keranjang; tambah hanya bila perlu |
-| 7 | CI/CD atau deploy manual? | Menentukan apakah tes berjalan otomatis | `[USULAN]` Minimal jalankan tes otomatis sebelum deploy |
-
-> Butir **1** sekarang paling mendesak: ADR-10 menetapkan penguncian pesimistik, dan tidak
-> semua pustaka mempermudah transaksi eksplisit. Memilih pustaka yang salah berarti
-> Availability Engine harus ditulis ulang di tengah jalan.
+| 1 | Penyedia object storage mana (AWS S3, Cloudflare R2, MinIO lokal)? | Hanya menyentuh modul unggah media | ADR-13 sudah mengunci **jenis** penyimpanannya; implementasi `media/` dibuat sebagai *interface* agar penyedia dapat ditukar |
 
 ---
 

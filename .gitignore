@@ -57,3 +57,13 @@ desktop.ini
 # Sementara
 *.tmp
 chk.tmp
+
+# Berkas sementara pemeriksaan
+chk*.tmp
+out.tmp
+ver.tmp
+run_mysql.bat
+
+# Status perkakas lokal
+computer-use-guide.json
+figma-state*.json
