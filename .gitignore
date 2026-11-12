@@ -67,3 +67,10 @@ run_mysql.bat
 # Status perkakas lokal
 computer-use-guide.json
 figma-state*.json
+
+# Artefak desain sementara lokal
+DESIGN-structure/
+design-extract.md
+detail-paket-sewa.jsx
+detail-paket-sewa.png
+/package-lock.json

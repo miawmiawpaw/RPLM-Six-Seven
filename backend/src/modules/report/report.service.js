@@ -40,6 +40,25 @@ async function laporanPenyewaan({ dari, sampai }) {
     .sum({ pendapatan: 'total_akhir' })
     .orderBy('tanggal_mulai');
 
+  // Daftar pesanan pada periode ini, dipakai tabel rincian di halaman laporan.
+  const daftarPesanan = await db('Order')
+    .join('User', 'User.user_id', 'Order.user_id')
+    .whereBetween('Order.tanggal_mulai', [dariFmt, sampaiFmt])
+    .leftJoin('OrderItem', 'OrderItem.order_id', 'Order.order_id')
+    .groupBy('Order.order_id', 'Order.kode_pesanan', 'Order.status', 'Order.total_akhir',
+      'Order.tanggal_mulai', 'Order.tanggal_selesai', 'User.nama')
+    .select(
+      'Order.order_id',
+      'Order.kode_pesanan',
+      'Order.status',
+      'Order.total_akhir',
+      'Order.tanggal_mulai',
+      'Order.tanggal_selesai',
+      'User.nama as pelanggan'
+    )
+    .count({ jumlah_item: 'OrderItem.order_item_id' })
+    .orderBy('Order.tanggal_mulai', 'desc');
+
   return {
     periode: { dari: dariFmt, sampai: sampaiFmt },
     total_pendapatan: Number(totalPendapatan.n) || 0,
@@ -52,6 +71,16 @@ async function laporanPenyewaan({ dari, sampai }) {
       tanggal: formatTanggal(h.tanggal_mulai),
       jumlah_pesanan: Number(h.jumlah_pesanan),
       pendapatan: Number(h.pendapatan) || 0,
+    })),
+    pesanan: daftarPesanan.map((p) => ({
+      order_id: String(p.order_id),
+      kode_pesanan: p.kode_pesanan,
+      pelanggan: p.pelanggan,
+      jumlah_item: Number(p.jumlah_item),
+      tanggal_mulai: formatTanggal(p.tanggal_mulai),
+      tanggal_selesai: formatTanggal(p.tanggal_selesai),
+      total_akhir: Number(p.total_akhir),
+      status: p.status,
     })),
   };
 }
@@ -75,28 +104,60 @@ async function laporanPemanfaatan({ dari, sampai }) {
     .sum({ total_unit: 'StockReservation.kuantitas' })
     .orderBy('jumlah_sewa', 'desc');
 
+  // Pendapatan per alat: dihitung dari OrderItem pada pesanan yang tidak
+  // dibatalkan, dibatasi ke periode yang sama dengan tabel pemanfaatan.
+  const pendapatanBaris = await db('OrderItem')
+    .join('Order', 'Order.order_id', 'OrderItem.order_id')
+    .where('OrderItem.tipe', 'ITEM')
+    .whereNot('Order.status', STATUS_PESANAN.DIBATALKAN)
+    .whereBetween('Order.created_at', [`${dariFmt} 00:00:00`, `${sampaiFmt} 23:59:59`])
+    .groupBy('OrderItem.item_id')
+    .select('OrderItem.item_id')
+    .sum({ pendapatan: 'OrderItem.subtotal' });
+
+  const petaPendapatan = new Map(
+    pendapatanBaris.map((r) => [String(r.item_id), Number(r.pendapatan) || 0])
+  );
+
   const totalHariPeriode = Math.max(
     1,
     Math.floor((new Date(sampaiFmt) - new Date(dariFmt)) / 86400000) + 1
   );
 
+  const totalAlatAktif = await db('Item').where('is_aktif', true).count({ n: 'item_id' });
+
+  const alat = baris.map((b) => {
+    const totalHariTersedia = b.stok_fisik * totalHariPeriode;
+    // Rasio pemanfaatan; dibatasi 100% agar anomali data tidak menghasilkan angka mustahil.
+    const rasio = totalHariTersedia > 0
+      ? Math.min(1, Number(b.total_unit) / totalHariTersedia)
+      : 0;
+
+    return {
+      item_id: String(b.item_id),
+      kode_barang: b.kode_barang,
+      nama: b.nama,
+      stok_fisik: b.stok_fisik,
+      jumlah_sewa: Number(b.jumlah_sewa),
+      kali_disewa: Number(b.jumlah_sewa),
+      total_unit_hari: Number(b.total_unit) || 0,
+      hari_tersewa: Number(b.total_unit) || 0,
+      rasio_pemanfaatan: rasio,
+      utilisasi_persen: Math.round(rasio * 1000) / 10,
+      pendapatan: petaPendapatan.get(String(b.item_id)) || 0,
+    };
+  });
+
+  const rataRata = alat.length > 0
+    ? alat.reduce((s, a) => s + a.rasio_pemanfaatan, 0) / alat.length
+    : 0;
+
   return {
     periode: { dari: dariFmt, sampai: sampaiFmt, jumlah_hari: totalHariPeriode },
-    alat: baris.map((b) => {
-      const totalHariTersedia = b.stok_fisik * totalHariPeriode;
-      return {
-        item_id: String(b.item_id),
-        kode_barang: b.kode_barang,
-        nama: b.nama,
-        stok_fisik: b.stok_fisik,
-        jumlah_sewa: Number(b.jumlah_sewa),
-        total_unit_hari: Number(b.total_unit) || 0,
-        // Rasio pemanfaatan; dibatasi 100% agar anomali data tidak menghasilkan angka mustahil.
-        rasio_pemanfaatan: totalHariTersedia > 0
-          ? Math.min(1, Number(b.total_unit) / totalHariTersedia)
-          : 0,
-      };
-    }),
+    total_alat: Number(totalAlatAktif[0].n),
+    utilisasi_rata_rata: Math.round(rataRata * 1000) / 10,
+    alat_tidak_terpakai: Math.max(0, Number(totalAlatAktif[0].n) - alat.length),
+    alat,
   };
 }
 
@@ -124,12 +185,56 @@ async function laporanPendapatan({ dari, sampai }) {
   const totalSewa = Number(sewa.total_sewa) || 0;
   const totalTambahan = Number(sewa.total_tambahan) || 0;
 
+  // Rincian per hari: sewa dihitung dari pesanan, denda dari Penalty pada hari
+  // pesanan dibuat. Digabung di JS agar satu tanggal tetap satu baris.
+  const sewaPerHari = await db('Order')
+    .whereBetween('created_at', [`${dariFmt} 00:00:00`, `${sampaiFmt} 23:59:59`])
+    .whereNotIn('status', [STATUS_PESANAN.DIBATALKAN])
+    .groupByRaw('DATE(created_at)')
+    .select(db.raw('DATE(created_at) as tanggal'))
+    .count({ jumlah_transaksi: 'order_id' })
+    .sum({ nilai_sewa: 'total_akhir' });
+
+  const dendaPerHari = await db('Penalty')
+    .join('Order', 'Order.order_id', 'Penalty.order_id')
+    .whereBetween('Order.created_at', [`${dariFmt} 00:00:00`, `${sampaiFmt} 23:59:59`])
+    .groupByRaw('DATE(Order.created_at)')
+    .select(db.raw('DATE(Order.created_at) as tanggal'))
+    .sum({ nilai_denda: 'Penalty.nominal' });
+
+  const petaHari = new Map();
+  for (const s of sewaPerHari) {
+    const kunci = formatTanggal(s.tanggal);
+    petaHari.set(kunci, {
+      tanggal: kunci,
+      jumlah_transaksi: Number(s.jumlah_transaksi),
+      nilai_sewa: Number(s.nilai_sewa) || 0,
+      nilai_denda: 0,
+    });
+  }
+  for (const d of dendaPerHari) {
+    const kunci = formatTanggal(d.tanggal);
+    const baris = petaHari.get(kunci) || {
+      tanggal: kunci,
+      jumlah_transaksi: 0,
+      nilai_sewa: 0,
+      nilai_denda: 0,
+    };
+    baris.nilai_denda = Number(d.nilai_denda) || 0;
+    petaHari.set(kunci, baris);
+  }
+
+  const rincian = [...petaHari.values()].sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
+
   return {
     periode: { dari: dariFmt, sampai: sampaiFmt },
+    // Nama kunci selaras dengan antarmuka laporan pendapatan.
     pendapatan_sewa: totalSewa,
     biaya_tambahan: totalTambahan,
+    total_pendapatan: totalSewa,
     total_denda: totalDenda,
     total_keseluruhan: totalSewa + totalTambahan + totalDenda,
+    rincian,
     rincian_denda: denda.map((d) => ({
       tipe: d.tipe,
       jumlah: Number(d.jumlah),
@@ -221,15 +326,47 @@ async function ringkasanDashboard() {
     .where('tanggal_selesai', '<', hariIni)
     .count({ n: 'order_id' });
 
+  // Lima pesanan terbaru untuk daftar ringkas di dasbor. Dibatasi di sini agar
+  // halaman dasbor tetap satu permintaan.
+  const pesananTerbaru = await db('Order')
+    .join('User', 'User.user_id', 'Order.user_id')
+    .select(
+      'Order.order_id',
+      'Order.kode_pesanan',
+      'Order.status',
+      'Order.total_akhir',
+      'Order.created_at',
+      'User.nama as pelanggan'
+    )
+    .orderBy('Order.created_at', 'desc')
+    .limit(5);
+
+  // Nama kunci diselaraskan dengan antarmuka: dasbor memerlukan rincian per
+  // tahap, bukan sekadar jumlah pesanan aktif.
+  const perluDisiapkan = await db('Order').where({ status: STATUS_PESANAN.DISIAPKAN }).count({ n: 'order_id' });
+  const sedangDisewa = await db('Order').where({ status: STATUS_PESANAN.SEDANG_DISEWA }).count({ n: 'order_id' });
+
   return {
     tanggal: hariIni,
     pesanan_aktif: Number(pesananAktif.n),
     menunggu_pembayaran: Number(menungguKonfirmasi.n),
+    pesanan_menunggu_pembayaran: Number(menungguKonfirmasi.n),
+    pesanan_perlu_disiapkan: Number(perluDisiapkan[0].n),
+    pesanan_sedang_disewa: Number(sedangDisewa[0].n),
     pendapatan_bulan_ini: Number(pendapatanBulanIni.n) || 0,
     total_alat_aktif: Number(totalAlat.n),
     alat_stok_menipis: Number(stokMenipis[0].n),
+    stok_menipis: Number(stokMenipis[0].n),
     pesanan_terlambat: Number(keterlambatan[0].n),
     denda_belum_lunas: Number(dendaBelumLunas.n) || 0,
+    pesanan_terbaru: pesananTerbaru.map((p) => ({
+      order_id: String(p.order_id),
+      kode_pesanan: p.kode_pesanan,
+      pelanggan: p.pelanggan,
+      status: p.status,
+      total_akhir: Number(p.total_akhir),
+      created_at: p.created_at,
+    })),
   };
 }
 
@@ -243,9 +380,9 @@ async function eksporCsv({ jenis, dari, sampai }) {
 
   if (jenis === 'pemanfaatan') {
     const laporan = await laporanPemanfaatan({ dari, sampai });
-    header = ['item_id', 'kode_barang', 'nama', 'stok_fisik', 'jumlah_sewa', 'total_unit_hari', 'rasio_pemanfaatan'];
+    header = ['item_id', 'kode_barang', 'nama', 'stok_fisik', 'jumlah_sewa', 'total_unit_hari', 'rasio_pemanfaatan', 'pendapatan'];
     baris = laporan.alat.map((a) => [
-      a.item_id, a.kode_barang, a.nama, a.stok_fisik, a.jumlah_sewa, a.total_unit_hari, a.rasio_pemanfaatan.toFixed(4),
+      a.item_id, a.kode_barang, a.nama, a.stok_fisik, a.jumlah_sewa, a.total_unit_hari, a.rasio_pemanfaatan.toFixed(4), a.pendapatan,
     ]);
   } else {
     const laporan = await laporanPenyewaan({ dari, sampai });

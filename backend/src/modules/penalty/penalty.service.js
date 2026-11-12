@@ -163,6 +163,50 @@ async function adaTunggakan(orderId, trx = db) {
 }
 
 /**
+ * Daftar pesanan yang memiliki denda — REQ-4.7.3.
+ *
+ * Ringkasan angka saja tidak cukup untuk halaman pengelolaan: admin perlu tahu
+ * pesanan mana yang perlu ditindaklanjuti. Setiap pesanan dikirim bersama
+ * daftar dendanya agar tabel dapat dirender tanpa permintaan tambahan per baris.
+ */
+async function daftarPesananBerDenda({ sertakanLunas = false } = {}) {
+  const kueri = db('Penalty')
+    .join('Order', 'Order.order_id', 'Penalty.order_id')
+    .join('User', 'User.user_id', 'Order.user_id')
+    .select(
+      'Order.order_id',
+      'Order.kode_pesanan',
+      'Order.status',
+      'Order.updated_at',
+      'User.nama as pelanggan'
+    )
+    .groupBy('Order.order_id', 'Order.kode_pesanan', 'Order.status', 'Order.updated_at', 'User.nama')
+    .orderBy('Order.updated_at', 'desc');
+
+  if (!sertakanLunas) {
+    kueri.whereExists(function () {
+      this.select(db.raw('1'))
+        .from('Penalty as P')
+        .whereRaw('P.order_id = Order.order_id')
+        .andWhere('P.status_pelunasan', 'BELUM_LUNAS');
+    });
+  }
+
+  const baris = await kueri;
+
+  return Promise.all(
+    baris.map(async (p) => ({
+      order_id: String(p.order_id),
+      kode_pesanan: p.kode_pesanan,
+      pelanggan: p.pelanggan,
+      status: p.status,
+      updated_at: p.updated_at,
+      denda: await dendaPesanan(p.order_id),
+    }))
+  );
+}
+
+/**
  * Tutup pesanan — REQ-4.7.6.
  * Transisi: DIKEMBALIKAN → SELESAI. Ditolak bila masih ada denda belum lunas.
  */
@@ -204,6 +248,6 @@ module.exports = {
   dendaPesanan,
   lunaskanDenda,
   ringkasanDenda,
-  adaTunggakan,
+  daftarPesananBerDenda,
   selesaikanPesanan,
 };

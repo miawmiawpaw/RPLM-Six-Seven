@@ -55,6 +55,24 @@ router.get(
 );
 
 /**
+ * GET /api/penalty/orders — daftar pesanan yang memiliki denda — REQ-4.7.3.
+ *
+ * Berbeda dari /summary yang hanya mengembalikan angka agregat: endpoint ini
+ * mengembalikan pesanan beserta rincian dendanya, agar halaman pengelolaan
+ * dapat ditindaklanjuti (menandai lunas, menyelesaikan pesanan).
+ */
+router.get(
+  '/orders',
+  authorize(PERAN.ADMIN, PERAN.PETUGAS),
+  asyncHandler(async (req, res) => {
+    const data = await service.daftarPesananBerDenda({
+      sertakanLunas: req.query.sertakan_lunas === 'true',
+    });
+    res.json({ status: 'sukses', data });
+  })
+);
+
+/**
  * GET /api/penalty/order/:orderId — REQ-4.7.4.
  * Pelanggan hanya boleh melihat denda pesanannya sendiri.
  */

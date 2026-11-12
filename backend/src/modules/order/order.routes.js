@@ -4,7 +4,8 @@ const { z } = require('zod');
 const service = require('./order.service');
 const { asyncHandler, formatTanggal } = require('../../utils/helpers');
 const { validate } = require('../../middleware/validate');
-const { authenticate } = require('../../middleware/auth');
+const { authenticate, authorize } = require('../../middleware/auth');
+const { PERAN } = require('../../constants');
 const { ConflictError } = require('../../utils/errors');
 
 const router = express.Router();
@@ -71,7 +72,10 @@ router.get(
   asyncHandler(async (req, res) => {
     const halaman = Number(req.query.halaman || 1);
     const batas = Math.min(Number(req.query.batas || 10), 50);
-    const hasil = await service.riwayatPengguna(req.user.id, { halaman, batas });
+    // Klien mengirim ?status=... untuk menyaring; teruskan ke service agar
+    // filter benar-benar berlaku (sebelumnya parameter ini diabaikan).
+    const status = req.query.status || null;
+    const hasil = await service.riwayatPengguna(req.user.id, { status, halaman, batas });
     res.json({ status: 'sukses', ...hasil });
   })
 );
@@ -94,6 +98,28 @@ router.post(
   asyncHandler(async (req, res) => {
     const pesanan = await service.batalkanPesanan({ orderId: req.params.id, userId: req.user.id });
     res.json({ status: 'sukses', message: 'Pesanan dibatalkan. Stok telah dilepaskan.', data: { pesanan } });
+  })
+);
+
+/**
+ * POST /api/orders/:id/ready — tandai pesanan siap diambil — REQ-4.4.3
+ *
+ * Transisi DIBAYAR → DISIAPKAN. Hanya ADMIN: penyiapan alat adalah tanggung
+ * jawab gudang (BR-021). Transisi tetap ditegakkan service layer (ADR-08),
+ * sehingga percobaan dari status lain ditolak dengan 409.
+ */
+router.post(
+  '/:id/ready',
+  authenticate,
+  authorize(PERAN.ADMIN),
+  asyncHandler(async (req, res) => {
+    const pesanan = await service.ubahStatus({
+      orderId: req.params.id,
+      statusBaru: 'DISIAPKAN',
+      aktorId: req.user.id,
+      keterangan: 'Ditandai siap diambil oleh admin.',
+    });
+    res.json({ status: 'sukses', message: 'Pesanan ditandai siap diambil.', data: { pesanan } });
   })
 );
 

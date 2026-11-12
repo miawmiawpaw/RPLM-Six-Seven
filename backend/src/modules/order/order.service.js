@@ -212,7 +212,11 @@ async function buatPesanan({ userId, barisKeranjang, tanggalMulai, tanggalSelesa
  * @param {number|string|null} userId bila diisi, periksa kepemilikan (BR-024)
  */
 async function ambilPesanan(orderId, userId = null, trx = db) {
-  const pesanan = await trx('Order').where({ order_id: orderId }).first();
+  const pesanan = await trx('Order')
+    .leftJoin('User', 'User.user_id', 'Order.user_id')
+    .where('Order.order_id', orderId)
+    .select('Order.*', 'User.nama as pelanggan', 'User.nomor_telepon as pelanggan_telepon')
+    .first();
   if (!pesanan) throw new NotFoundError('Pesanan tidak ditemukan.');
 
   if (userId !== null && String(pesanan.user_id) !== String(userId)) {
@@ -225,6 +229,8 @@ async function ambilPesanan(orderId, userId = null, trx = db) {
     order_id: String(pesanan.order_id),
     kode_pesanan: pesanan.kode_pesanan,
     user_id: String(pesanan.user_id),
+    pelanggan: pesanan.pelanggan,
+    pelanggan_telepon: pesanan.pelanggan_telepon,
     tanggal_mulai: formatTanggal(pesanan.tanggal_mulai),
     tanggal_selesai: formatTanggal(pesanan.tanggal_selesai),
     status: pesanan.status,
@@ -247,12 +253,17 @@ async function ambilPesanan(orderId, userId = null, trx = db) {
 }
 
 /** Riwayat pesanan milik satu pengguna — REQ-4.6.4. */
-async function riwayatPengguna(userId, { halaman = 1, batas = 10 } = {}) {
+async function riwayatPengguna(userId, { status = null, halaman = 1, batas = 10 } = {}) {
   const offset = (halaman - 1) * batas;
 
-  const [total] = await db('Order').where({ user_id: userId }).count({ n: '*' });
+  // Penyaringan status dipakai halaman "Pesanan Saya". Bila tidak dikirim,
+  // seluruh status ditampilkan seperti sebelumnya.
+  const saring = { user_id: userId };
+  if (status) saring.status = status;
+
+  const [total] = await db('Order').where(saring).count({ n: '*' });
   const baris = await db('Order')
-    .where({ user_id: userId })
+    .where(saring)
     .orderBy('created_at', 'desc')
     .limit(batas)
     .offset(offset);

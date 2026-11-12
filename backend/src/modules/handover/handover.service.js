@@ -279,15 +279,27 @@ async function catatPengembalian({ orderId, petugasId, catatan, fotoUrl, items, 
 
 /** Daftar pesanan yang perlu diserahkan/dikembalikan petugas — REQ-4.5.1. */
 async function daftarTugasPetugas() {
-  const perluDiserahkan = await db('Order')
-    .join('User', 'User.user_id', 'Order.user_id')
-    .where('Order.status', STATUS_PESANAN.DISIAPKAN)
-    .select('Order.order_id', 'Order.kode_pesanan', 'Order.tanggal_mulai', 'Order.tanggal_selesai', 'User.nama as pelanggan');
+  // Nomor telepon dan jumlah unit ikut dikirim: petugas memakainya untuk
+  // menghubungi penyewa dan memperkirakan jumlah alat yang harus dibawa.
+  const dasar = () =>
+    db('Order')
+      .join('User', 'User.user_id', 'Order.user_id')
+      .leftJoin('OrderItem', 'OrderItem.order_id', 'Order.order_id')
+      .groupBy('Order.order_id', 'Order.kode_pesanan', 'Order.status', 'Order.tanggal_mulai',
+        'Order.tanggal_selesai', 'User.nama', 'User.nomor_telepon')
+      .select(
+        'Order.order_id',
+        'Order.kode_pesanan',
+        'Order.status',
+        'Order.tanggal_mulai',
+        'Order.tanggal_selesai',
+        'User.nama as pelanggan',
+        'User.nomor_telepon as pelanggan_telepon'
+      )
+      .count({ jumlah_item: 'OrderItem.order_item_id' });
 
-  const perluDikembalikan = await db('Order')
-    .join('User', 'User.user_id', 'Order.user_id')
-    .where('Order.status', STATUS_PESANAN.SEDANG_DISEWA)
-    .select('Order.order_id', 'Order.kode_pesanan', 'Order.tanggal_mulai', 'Order.tanggal_selesai', 'User.nama as pelanggan');
+  const perluDiserahkan = await dasar().where('Order.status', STATUS_PESANAN.DISIAPKAN);
+  const perluDikembalikan = await dasar().where('Order.status', STATUS_PESANAN.SEDANG_DISEWA);
 
   return {
     perlu_disarahkan: perluDiserahkan.map(formatTugas),
@@ -300,6 +312,9 @@ function formatTugas(p) {
     order_id: String(p.order_id),
     kode_pesanan: p.kode_pesanan,
     pelanggan: p.pelanggan,
+    pelanggan_telepon: p.pelanggan_telepon || null,
+    jumlah_item: Number(p.jumlah_item) || 0,
+    status: p.status,
     tanggal_mulai: p.tanggal_mulai,
     tanggal_selesai: p.tanggal_selesai,
   };
