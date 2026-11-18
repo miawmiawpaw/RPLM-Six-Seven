@@ -1,7 +1,8 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth, PERAN } from '../context/AuthContext';
 import { useKeranjang } from '../context/CartContext';
-
+import logo from '../../assets/Rental Camping/Footer Logo.svg';
+import cartIcon from '../../assets/Rental Camping/Cart Icon.svg';
 /**
  * Kerangka halaman: header, navigasi per peran, dan wadah konten.
  *
@@ -49,54 +50,21 @@ export default function TataLetak() {
 
   return (
     <div className="tata-letak">
-      <header className="header">
-        <Link to="/" className="merek">
-          Rental Alat Camping
-        </Link>
-
+      <header className="header meadow-header">
+        <Link to="/" className="merek"><img src={logo} alt="" /><span><strong>RENTAL CAMPING</strong><small>OUTDOOR RENTAL</small></span></Link>
         <nav className="navigasi" aria-label="Navigasi utama">
-          {menu.map((item) => (
-            <NavLink
-              key={item.ke}
-              to={item.ke}
-              className={({ isActive }) => (isActive ? 'tautan aktif' : 'tautan')}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          <NavLink to="/katalog" className="tautan">Katalog Alat</NavLink>
+          <a className="tautan" href="/#paket">Paket Sewa</a>
+          <a className="tautan" href="/#cara-sewa">Cara Sewa</a>
+          <a className="tautan" href="/#bantuan">Bantuan</a>
         </nav>
-
         <div className="aksi-header">
-          {/* Keranjang hanya bermakna untuk pelanggan. */}
-          {(!masukAkun || peran === PERAN.PELANGGAN) && (
-            <Link to="/keranjang" className="tautan-keranjang">
-              Keranjang
-              {totalItem > 0 && <span className="lencana">{totalItem}</span>}
-            </Link>
-          )}
-
-          {masukAkun ? (
-            <>
-              <span className="nama-pengguna">{pengguna?.nama}</span>
-              <button type="button" onClick={tanganiKeluar} className="tombol-kecil">
-                Keluar
-              </button>
-            </>
-          ) : (
-            <Link to="/daftar" className="tombol-kecil">
-              Daftar
-            </Link>
-          )}
+          {(!masukAkun || peran === PERAN.PELANGGAN) && <Link to="/keranjang" className="tautan-keranjang"><img src={cartIcon} alt="" />Keranjang{totalItem > 0 && <span className="lencana">{totalItem}</span>}</Link>}
+          {masukAkun ? <><span className="nama-pengguna">{pengguna?.nama}</span><button type="button" onClick={tanganiKeluar} className="tombol-kecil">Keluar</button></> : <Link to="/masuk" className="tombol-kecil">Masuk</Link>}
         </div>
       </header>
-
-      <main className="konten">
-        <Outlet />
-      </main>
-
-      <footer className="footer">
-        <p>Sistem Informasi Rental Alat Camping — Proyek UAS RPLM</p>
-      </footer>
+      <main className="konten"><Outlet /></main>
+      <footer className="footer meadow-footer"><p>RENTAL CAMPING — Penyedia perlengkapan outdoor untuk perjalanan yang lebih nyaman dan berkesan.</p><p>© 2026 Rental Camping Indonesia. Hak Cipta Dilindungi.</p></footer>
     </div>
   );
 }

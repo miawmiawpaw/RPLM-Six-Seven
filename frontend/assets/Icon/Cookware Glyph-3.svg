@@ -1,0 +1,7 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="stroke0_109_86" fill="white">
+<path d="M3.33333 6.66699H12.6667L11.6667 12.667H4.33333L3.33333 6.66699Z"/>
+</mask>
+<path d="M3.33333 6.66699H12.6667L11.6667 12.667H4.33333L3.33333 6.66699Z" stroke-width="3.6" stroke="#415325" mask="url(#stroke0_109_86)"/>
+<path d="M2 6.66667H14M5.33333 4.33333V3M8 4.33333V2M10.6667 4.33333V3M5.33333 12.6667V13.6667M10.6667 12.6667V13.6667" stroke-width="1.8" stroke="#415325"/>
+</svg>
