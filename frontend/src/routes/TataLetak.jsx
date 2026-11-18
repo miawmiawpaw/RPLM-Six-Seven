@@ -3,6 +3,7 @@ import { useAuth, PERAN } from '../context/AuthContext';
 import { useKeranjang } from '../context/CartContext';
 import logo from '../../assets/Rental Camping/Footer Logo.svg';
 import cartIcon from '../../assets/Rental Camping/Cart Icon.svg';
+import footerArtwork from '../../assets/Meadow Hills Footer Artwork.svg';
 /**
  * Kerangka halaman: header, navigasi per peran, dan wadah konten.
  *
@@ -64,7 +65,9 @@ export default function TataLetak() {
         </div>
       </header>
       <main className="konten"><Outlet /></main>
-      <footer className="footer meadow-footer"><p>RENTAL CAMPING — Penyedia perlengkapan outdoor untuk perjalanan yang lebih nyaman dan berkesan.</p><p>© 2026 Rental Camping Indonesia. Hak Cipta Dilindungi.</p></footer>
+      <footer className="meadow-footer"><img className="meadow-footer-art" src={footerArtwork} alt="" /><div className="meadow-footer-content"><div className="meadow-footer-cta"><h2>Saatnya melangkah lebih jauh.</h2><p className="meadow-footer-accent">Cerita baik menunggu di luar sana.</p><p>Siapkan perlengkapanmu. Sisanya, biarkan alam yang bercerita.</p><Link to="/katalog" className="tombol-utama">Mulai Sewa</Link></div><div className="meadow-footer-divider" /><div className="meadow-footer-main"><div className="meadow-footer-brand"><div><img src={logo} alt="" /><strong>RENTAL CAMPING</strong></div><p>Penyedia perlengkapan outdoor untuk perjalanan yang lebih nyaman dan berkesan.</p></div><FooterLinks title="JELAJAHI" links={[["Katalog Alat", "/katalog"], ["Paket Sewa", "/#paket"], ["Cara Sewa", "/#cara-sewa"]]} /><FooterLinks title="INFORMASI" links={[["Syarat & Ketentuan", "#"], ["Kebijakan Privasi", "#"], ["Bantuan & FAQ", "/#bantuan"]]} /><FooterLinks title="HUBUNGI KAMI" links={[["Bantuan & FAQ", "/#bantuan"], ["+62 812-3456-7890", "tel:+6281234567890"], ["Yogyakarta, Indonesia", "#"]]} /></div><div className="meadow-footer-divider" /><p className="meadow-footer-copyright">© 2026 Rental Camping Indonesia. Hak Cipta Dilindungi.</p></div></footer>
     </div>
   );
 }
+
+function FooterLinks({ title, links }) { return <div className="meadow-footer-links"><strong>{title}</strong>{links.map(([label, to]) => <Link key={label} to={to}>{label}</Link>)}</div>; }
