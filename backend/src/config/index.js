@@ -57,13 +57,11 @@ const config = {
     isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
   },
 
+  // Mailtrap Email API (paket npm "mailtrap"). Tanpa token: email dicetak ke konsol (non-produksi).
   mail: {
-    host: process.env.MAIL_HOST || '',
-    port: Number(process.env.MAIL_PORT || 587),
-    secure: process.env.MAIL_SECURE === 'true',
-    user: process.env.MAIL_USER || '',
-    password: process.env.MAIL_PASSWORD || '',
-    from: process.env.MAIL_FROM || 'Rental Alat Camping <no-reply@example.com>',
+    apiToken: process.env.MAILTRAP_API_TOKEN || '',
+    fromEmail: process.env.MAIL_FROM_EMAIL || 'hello@demomailtrap.co',
+    fromName: process.env.MAIL_FROM_NAME || 'Rental Alat Camping',
   },
 
   app: {

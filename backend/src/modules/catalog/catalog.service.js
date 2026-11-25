@@ -14,10 +14,21 @@ const availability = require('../inventory/availability.service');
 /** Daftar kategori — REQ-4.2.2. */
 async function daftarKategori() {
   const baris = await db('Category').select('category_id', 'nama', 'deskripsi').orderBy('nama');
+
+  // Jumlah unit fisik berstatus TERSEDIA per kategori (bukan ketersediaan per tanggal) —
+  // dipakai landing page untuk label "N unit tersedia".
+  const stok = await db('Item')
+    .where({ is_aktif: true, status_kondisi: 'TERSEDIA' })
+    .groupBy('category_id')
+    .select('category_id')
+    .sum({ total: 'stok_fisik' });
+  const stokPerKategori = new Map(stok.map((s) => [String(s.category_id), Number(s.total)]));
+
   return baris.map((k) => ({
     category_id: String(k.category_id),
     nama: k.nama,
     deskripsi: k.deskripsi,
+    jumlah_tersedia: stokPerKategori.get(String(k.category_id)) || 0,
   }));
 }
 

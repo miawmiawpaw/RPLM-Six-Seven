@@ -11,6 +11,7 @@ const {
   ValidationError,
 } = require('../../utils/errors');
 const { catatAudit, AKSI_AUDIT } = require('../../middleware/auditLogger');
+const { kirimEmail } = require('../../utils/mailer');
 
 /**
  * Modul autentikasi — REQ-4.1.1 s.d. REQ-4.1.5.
@@ -102,11 +103,20 @@ async function daftar({ nama, email, nomor_telepon, password }) {
     sesudah: { nama, email, role: PERAN.PELANGGAN },
   });
 
-  // TODO: kirim email verifikasi. Token sudah dapat diterbitkan, tetapi pengiriman
-  // email menunggu konfigurasi SMTP pada .env.
+  // Token hanya dikirim lewat email — tidak pernah dikembalikan di respons.
   const tokenVerifikasi = terbitkanToken(user, JENIS_TOKEN.VERIFIKASI_EMAIL, '24h');
+  try {
+    await kirimEmail({
+      to: user.email,
+      subject: 'Verifikasi email akun Rental Camping',
+      text: `Halo ${user.nama},\n\nBuka tautan berikut untuk mengaktifkan akun (berlaku 24 jam):\n${config.app.baseUrl}/verifikasi-email?token=${tokenVerifikasi}`,
+    });
+  } catch (err) {
+    // Akun sudah dibuat; kegagalan SMTP tidak boleh membatalkan pendaftaran.
+    console.error('[EMAIL] Gagal kirim verifikasi:', err.message);
+  }
 
-  return { pengguna: penggunaAman(user), tokenVerifikasi };
+  return { pengguna: penggunaAman(user) };
 }
 
 /** REQ-4.1.2 — verifikasi email. */
@@ -236,8 +246,17 @@ async function lupaKataSandi(email) {
 
   const tokenReset = terbitkanToken(user, JENIS_TOKEN.RESET_KATA_SANDI, config.jwt.resetExpiresIn);
 
-  // TODO: kirim email berisi tautan reset. Belum aktif sampai SMTP dikonfigurasi.
-  return { terkirim: true, tokenReset };
+  try {
+    await kirimEmail({
+      to: user.email,
+      subject: 'Atur ulang kata sandi Rental Camping',
+      text: `Buka tautan berikut untuk mengatur ulang kata sandi (berlaku 30 menit):\n${config.app.baseUrl}/atur-ulang-kata-sandi?token=${tokenReset}\n\nAbaikan email ini bila bukan Anda yang meminta.`,
+    });
+  } catch (err) {
+    console.error('[EMAIL] Gagal kirim reset:', err.message);
+  }
+
+  return { terkirim: true };
 }
 
 /** REQ-4.1.4 — atur ulang kata sandi memakai token. */

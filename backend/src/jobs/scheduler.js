@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const db = require('../config/database');
-const { STATUS_PESANAN, STATUS_PESANAN_AKTIF } = require('../constants');
-const { catatAudit, AKSI_AUDIT } = require('../middleware/auditLogger');
+const { STATUS_PESANAN } = require('../constants');
+const orderService = require('../modules/order/order.service');
 
 /**
  * Scheduler — ADR-15: node-cron di dalam proses aplikasi.
@@ -16,43 +16,37 @@ const { catatAudit, AKSI_AUDIT } = require('../middleware/auditLogger');
  * REQ-4.4.3 — pesanan yang tidak dibayar dalam 1x24 jam batal otomatis
  * dan kunci stoknya dilepaskan.
  *
- * Reservasi TIDAK dihapus, melainkan diubah statusnya. Menghapusnya akan menghilangkan
- * jejak; membiarkannya dengan status GAGAL_KEDALUWARSA membuat Availability Engine
- * otomatis mengabaikannya karena statusnya tidak termasuk STATUS_PESANAN_AKTIF.
+ * Memakai orderService.ubahStatus (sumber tunggal transisi status): ia memvalidasi
+ * transisi, melepas reservasi (AKTIF -> DILEPAS), dan mencatat audit. Reservasi tidak
+ * dihapus agar jejaknya tetap ada.
  */
 async function batalkanPesananKedaluwarsa() {
-  const sekarang = new Date();
-
   const pesananKedaluwarsa = await db('Order')
     .where('status', STATUS_PESANAN.MENUNGGU_PEMBAYARAN)
-    .where('batas_pembayaran', '<', sekarang)
-    .select('id', 'kode_pesanan', 'user_id');
+    .where('batas_pembayaran', '<', new Date())
+    .select('order_id', 'kode_pesanan');
 
-  if (pesananKedaluwarsa.length === 0) return 0;
-
+  let dibatalkan = 0;
   for (const pesanan of pesananKedaluwarsa) {
-    await db.transaction(async (trx) => {
-      await trx('Order')
-        .where({ id: pesanan.id, status: STATUS_PESANAN.MENUNGGU_PEMBAYARAN })
-        .update({ status: STATUS_PESANAN.GAGAL_KEDALUWARSA, diubah_pada: trx.fn.now() });
-
-      await trx('StockReservation')
-        .where({ order_id: pesanan.id })
-        .whereIn('status', STATUS_PESANAN_AKTIF)
-        .update({ status: STATUS_PESANAN.GAGAL_KEDALUWARSA, diubah_pada: trx.fn.now() });
-
-      await catatAudit({
-        trx,
-        aksi: AKSI_AUDIT.PESANAN_KEDALUWARSA,
-        entity: 'Order',
-        entityId: pesanan.id,
-        keterangan: `Pesanan ${pesanan.kode_pesanan} batal otomatis karena melewati batas pembayaran.`,
-      });
-    });
+    try {
+      await db.transaction((trx) =>
+        orderService.ubahStatus({
+          orderId: pesanan.order_id,
+          statusBaru: STATUS_PESANAN.GAGAL_KEDALUWARSA,
+          aktorId: null,
+          keterangan: `Pesanan ${pesanan.kode_pesanan} batal otomatis karena melewati batas pembayaran.`,
+          trx,
+        })
+      );
+      dibatalkan += 1;
+    } catch (err) {
+      // Satu pesanan gagal (mis. baru saja dibayar) tidak boleh menghentikan sisanya.
+      console.error(`[SCHEDULER] Lewati pesanan ${pesanan.kode_pesanan}:`, err.message);
+    }
   }
 
-  console.log(`[SCHEDULER] ${pesananKedaluwarsa.length} pesanan ditandai kedaluwarsa.`);
-  return pesananKedaluwarsa.length;
+  if (dibatalkan > 0) console.log(`[SCHEDULER] ${dibatalkan} pesanan ditandai kedaluwarsa.`);
+  return dibatalkan;
 }
 
 /**
@@ -63,10 +57,10 @@ async function kirimPengingatPengembalian() {
   const besok = new Date(Date.now() + 86400000);
 
   const akanKembali = await db('Order')
-    .join('User', 'User.id', 'Order.user_id')
+    .join('User', 'User.user_id', 'Order.user_id')
     .where('Order.status', STATUS_PESANAN.SEDANG_DISEWA)
-    .whereDate('Order.tanggal_selesai', besok.toISOString().slice(0, 10))
-    .select('Order.id', 'Order.kode_pesanan', 'User.email', 'User.nama');
+    .where('Order.tanggal_selesai', besok.toISOString().slice(0, 10))
+    .select('Order.order_id', 'Order.kode_pesanan', 'User.email', 'User.nama');
 
   // TODO: sambungkan ke modul notifikasi email setelah ADR penyedia SMTP final.
   console.log(`[SCHEDULER] ${akanKembali.length} pengingat pengembalian perlu dikirim.`);
