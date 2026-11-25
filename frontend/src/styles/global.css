@@ -1583,3 +1583,164 @@ textarea {
 .landing-map iframe { display: block; width: 100%; height: 100%; min-height: 220px; border: 0; border-radius: 24px; }
 .meadow-footer-art + .meadow-footer-content { position: relative; z-index: 1; }
 .landing-art-photo { background: #dce5d8; }.landing-hero-photo { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; }.landing-art-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(244,244,239,.08), rgba(37,48,25,.18)); pointer-events: none; }.landing-art-photo .landing-note { z-index: 1; }
+
+/* ─── Landing: penyesuaian terhadap Figma "Meadow Rise" ─────────────────────── */
+.landing-eyebrow-pill { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 24px; padding: 6px 12px; border-radius: 999px; background: #e9ece3; color: #415325; font-size: 12px; line-height: 16px; font-weight: 600; }
+.landing-eyebrow-pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #3f6939; }
+.landing-eyebrow-pill span { color: #415325; }
+.landing-grid-three { grid-template-columns: repeat(3, minmax(0, 300px)); gap: 24px; }
+.landing-product-art { align-items: end; }
+.landing-pkg-art { position: relative; width: 100%; aspect-ratio: 276 / 164; margin-top: 9px; }
+.landing-pkg-art > * { position: absolute; display: block; max-width: none; }
+.landing-pkg-hills { inset: 0; width: 100%; height: 100%; }
+.landing-pkg-art .pkg-sun { left: 75%; top: 10.5%; width: 12.5%; }
+.landing-pkg-art .pkg-tent { top: 29.5%; height: 47.9%; }
+.landing-pkg-art .pkg-tent-body, .landing-pkg-art .pkg-tent-roof { left: 25.9%; width: 48.1%; }
+.landing-pkg-art .pkg-tent-left { left: 25.9%; width: 23.4%; }
+.landing-pkg-art .pkg-tent-right, .landing-pkg-art .pkg-tent-fold { left: 49.4%; width: 24.7%; }
+.landing-pkg-art .pkg-tent-door { left: 48.7%; top: 48.9%; width: 8.1%; height: 28.4%; }
+@media (max-width: 900px) { .landing-grid-three { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); } }
+@media (max-width: 560px) { .landing-grid-three { grid-template-columns: 1fr; } }
+
+/* Tombol CTA footer — Figma "Footer CTA" (pill 224×48, #415325) */
+.meadow-footer-cta .tombol-utama { display: inline-flex; align-items: center; justify-content: center; min-width: 224px; min-height: 48px; padding: 0 24px; border: 0; border-radius: 999px; background: #415325; color: #fff; font: 600 14px/20px Inter, sans-serif; text-decoration: none; cursor: pointer; }
+.meadow-footer-cta .tombol-utama:hover { background: #253019; color: #fff; text-decoration: none; }
+.meadow-footer-cta .tombol-utama:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+@media (max-width: 560px) { .meadow-footer-cta .tombol-utama { width: 100%; } }
+
+/* ─── Masuk & Daftar — Figma "Login / Register — Desktop / 1440" ───────────── */
+.auth { display: grid; grid-template-columns: 520px minmax(0, 1fr); min-height: 100vh; background: #faf8f2; color: #1d2618; font-family: Inter, sans-serif; }
+.auth-panel { position: relative; display: flex; flex-direction: column; overflow: hidden; padding: 54px 60px 40px; background: #e9ece3; }
+.auth-merek { display: flex; align-items: center; gap: 12px; color: #1d2618; text-decoration: none; }
+.auth-merek img { width: 40px; height: 40px; }
+.auth-merek span { display: grid; gap: 2px; }
+.auth-merek strong { font: 600 16px/20px 'Plus Jakarta Sans', sans-serif; letter-spacing: -.005em; }
+.auth-merek small { color: #515b47; font: 600 9px/12px Inter, sans-serif; letter-spacing: .06em; }
+.auth-panel-teks { position: relative; z-index: 1; margin-top: 124px; }
+.auth-eyebrow { margin: 0 0 20px; color: #415325; font: 600 10px/12px Inter, sans-serif; letter-spacing: .08em; }
+.auth-judul { margin: 0; color: #1d2618; font: 700 36px/44px 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; }
+.auth-aksen { margin: 10px -24px 0 0; color: #415325; font: italic 34px/44px 'Instrument Serif', serif; letter-spacing: -.01em; }
+.auth-deskripsi { max-width: 400px; margin: 14px 0 0; color: #515b47; font-size: 14px; line-height: 21px; }
+.auth-ilustrasi { position: absolute; left: 0; bottom: 0; width: 100%; height: 500px; border-radius: 28px 28px 0 0; }
+.auth-catatan { position: relative; z-index: 1; margin: auto 0 0; color: #fff; font: 600 10px/12px Inter, sans-serif; letter-spacing: .06em; }
+
+.auth-konten { display: flex; justify-content: center; padding: 54px 40px 32px; }
+.auth-kolom { display: flex; flex-direction: column; width: 100%; max-width: 520px; }
+.auth-kembali { align-self: flex-end; margin-bottom: 40px; color: #515b47; font-size: 12px; line-height: 16px; text-decoration: none; }
+.auth-kembali:hover { color: #415325; text-decoration: underline; }
+.auth-kartu { padding: 39px 41px; border: 1px solid #858f79; border-radius: 32px; background: #fff; box-shadow: 0 12px 28px rgba(26,36,20,.1); }
+.auth-kartu h1 { margin: 0; color: #1d2618; font: 700 28px/34px 'Plus Jakarta Sans', sans-serif; letter-spacing: -.015em; }
+.auth-sub { margin: 8px 0 16px; color: #515b47; font-size: 14px; line-height: 20px; }
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+.auth-bidang { display: flex; flex-direction: column; gap: 8px; }
+.auth-bidang > span, .auth-bidang > label { color: #1d2618; font: 600 12px/16px Inter, sans-serif; }
+.auth-input, .auth-kartu .auth-input { display: flex; align-items: center; gap: 8px; width: 100%; height: 52px; padding: 0 16px; border: 1px solid #858f79; border-radius: 14px; background: #fff; color: #1d2618; font: 400 14px/20px Inter, sans-serif; box-sizing: border-box; }
+.auth-input input, .auth-input-sandi input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; }
+.auth-input:focus-within, .auth-kartu input.auth-input:focus { border-color: #415325; box-shadow: 0 0 0 3px rgba(65,83,37,.18); outline: 0; }
+.auth-input ::placeholder, .auth-kartu input.auth-input::placeholder { color: #6b7561; opacity: 1; }
+.auth-input-telepon b { padding-right: 12px; border-right: 1px solid #858f79; color: #415325; font-weight: 600; line-height: 20px; }
+.auth-mata { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #415325; cursor: pointer; }
+.auth-mata:hover { background: #e9ece3; }
+.auth-lupa { display: flex; justify-content: flex-end; margin-top: -4px; font-size: 12px; font-weight: 600; line-height: 16px; }
+.auth-lupa a, .auth-ganti a { color: #415325; text-decoration: none; }
+.auth-lupa a:hover, .auth-ganti a:hover { text-decoration: underline; }
+.auth-setuju { display: flex; align-items: center; gap: 10px; color: #515b47; font-size: 11px; line-height: 16px; cursor: pointer; }
+.auth-setuju input { flex: none; width: 18px; height: 18px; margin: 0; accent-color: #415325; }
+.auth-tombol { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; margin-top: 4px; padding: 0 24px; border: 0; border-radius: 999px; background: #415325; color: #fff; font: 600 14px/20px Inter, sans-serif; cursor: pointer; }
+.auth-tombol:hover:not(:disabled) { background: #253019; }
+.auth-tombol:disabled { opacity: .65; cursor: progress; }
+.auth-tombol:focus-visible, .auth-mata:focus-visible { outline: 2px solid #415325; outline-offset: 2px; }
+.auth-ganti { margin: 20px 0 0; color: #515b47; font-size: 12px; line-height: 16px; text-align: center; }
+.auth-ganti a { margin-left: 4px; font-weight: 600; }
+.auth-hak { margin: auto 0 0; padding-top: 32px; color: #515b47; font-size: 11px; line-height: 12px; text-align: center; }
+.auth-kartu .pesan-galat, .auth-kartu .pesan-sukses, .auth-kartu .kotak-peringatan { margin: 0 0 16px; }
+@media (max-width: 900px) {
+  .auth { grid-template-columns: 1fr; }
+  .auth-panel { display: none; }
+  .auth-konten { padding: 24px 16px; }
+  .auth-kartu { padding: 28px 24px; border-radius: 24px; }
+}
+
+/* ─── Katalog — Figma "Katalog & Pencarian Alat" (gaya Meadow Rise) ──────────── */
+.kat { min-height: 70vh; padding: 48px max(24px, calc((100% - 1240px) / 2)) 80px; background: #faf8f2; color: #1d2618; font-family: Inter, sans-serif; }
+.kat h1, .kat h2, .kat h3 { color: #1d2618; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em; }
+.kat-kepala h1 { margin: 0 0 8px; font-size: 32px; line-height: 40px; font-weight: 700; }
+.kat-kepala > p:last-child { margin: 0; color: #515b47; font-size: 16px; line-height: 24px; }
+.kat-kepala .landing-eyebrow { margin-bottom: 12px; }
+
+.kat-panel { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 32px; margin: 28px 0 24px; padding: 20px 24px; border: 1px solid #858f79; border-radius: 24px; background: #fff; box-shadow: 0 12px 28px rgba(26,36,20,.08); }
+.kat-cari { display: flex; flex: 1 1 320px; align-items: center; gap: 12px; }
+.kat-cari .label-cari { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.kat-cari input[type='search'] { flex: 1; min-width: 0; height: 48px; padding: 0 16px; border: 1px solid #858f79; border-radius: 12px; background: #fff; color: #1d2618; font: 400 14px/20px Inter, sans-serif; }
+.kat-cari input[type='search']:focus, .kat-panel .pemilih-tanggal input:focus { border-color: #415325; box-shadow: 0 0 0 3px rgba(65,83,37,.18); outline: 0; }
+.kat-panel .pemilih-tanggal { display: flex; gap: 16px; }
+.kat-panel .pemilih-tanggal label { display: grid; gap: 6px; color: #1d2618; font: 600 12px/16px Inter, sans-serif; }
+.kat-panel .pemilih-tanggal input { height: 48px; padding: 0 12px; border: 1px solid #858f79; border-radius: 12px; background: #fff; color: #515b47; font: 400 14px/20px Inter, sans-serif; }
+
+.kat-tab { display: inline-flex; gap: 4px; margin-bottom: 24px; padding: 4px; border-radius: 16px; background: #e9ece3; }
+.kat-tab button { padding: 10px 20px; border: 0; border-radius: 12px; background: transparent; color: #515b47; font: 600 14px/20px Inter, sans-serif; cursor: pointer; }
+.kat-tab button:hover { color: #1d2618; }
+.kat-tab button.aktif { background: #fff; color: #1d2618; box-shadow: 0 1px 3px rgba(26,36,20,.12); }
+
+.kat-isi { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 32px; align-items: start; }
+.kat-filter { position: sticky; top: 104px; padding: 20px; border: 1px solid #858f79; border-radius: 20px; background: #fff; }
+.kat-filter-kepala { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.kat-filter-kepala h2 { margin: 0; font-size: 18px; line-height: 26px; font-weight: 600; }
+.kat-filter-kepala button { border: 0; background: transparent; color: #415325; font: 600 12px/16px Inter, sans-serif; text-decoration: underline; cursor: pointer; }
+.kat-filter fieldset { margin: 0; padding: 0; border: 0; }
+.kat-filter legend { margin-bottom: 10px; padding: 0; color: #515b47; font: 600 11px/16px Inter, sans-serif; letter-spacing: .06em; }
+.kat-filter label { display: flex; align-items: center; gap: 10px; padding: 7px 0; color: #1d2618; font: 400 14px/20px Inter, sans-serif; cursor: pointer; }
+.kat-filter input[type='radio'] { width: 16px; height: 16px; margin: 0; accent-color: #415325; }
+
+.kat-judul { display: flex; align-items: center; justify-content: space-between; margin: 0 0 16px; }
+.kat-judul h2 { margin: 0; font-size: 22px; line-height: 30px; font-weight: 600; }
+.kat-total { padding: 4px 12px; border-radius: 999px; background: #e9ece3; color: #415325; font: 600 12px/16px Inter, sans-serif; }
+.kat-hasil > .kat-grid + .kat-judul { margin-top: 36px; }
+.kat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin: 0; padding: 0; list-style: none; }
+.kat-kartu { display: flex; flex-direction: column; gap: 6px; padding: 12px 12px 16px; border: 1px solid #858f79; border-radius: 24px; background: #fff; transition: box-shadow .15s, transform .15s; }
+.kat-kartu:hover { box-shadow: 0 12px 28px rgba(26,36,20,.12); transform: translateY(-2px); }
+.kat-kartu > small { margin-top: 8px; color: #515b47; font: 600 11px/16px Inter, sans-serif; letter-spacing: .05em; text-transform: uppercase; }
+.kat-kartu h3 { margin: 0; font-size: 18px; line-height: 26px; font-weight: 600; }
+.kat-kartu h3 a { color: inherit; text-decoration: none; }
+.kat-kartu h3 a:hover { color: #415325; text-decoration: underline; }
+.kat-ket { margin: 0; color: #515b47; font-size: 14px; line-height: 20px; }
+.kat-ubin { position: relative; display: grid; height: 150px; place-items: center; overflow: hidden; border-radius: 16px; background: linear-gradient(#e9ece3, #dce5d8); }
+.kat-ubin::after { content: ''; position: absolute; right: 0; bottom: 0; left: 0; height: 38%; background: #869b54; clip-path: polygon(0 40%, 30% 10%, 62% 45%, 100% 15%, 100% 100%, 0 100%); opacity: .55; }
+.kat-ubin img { position: relative; z-index: 1; width: 44px; height: 44px; }
+.kat-lencana { position: absolute; top: 10px; left: 10px; z-index: 1; padding: 3px 10px; border-radius: 999px; background: #fff; color: #1d2618; font: 600 11px/16px Inter, sans-serif; }
+.kat-lencana-gelap { background: #253019; color: #fff; }
+.kat-chip { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; padding: 0; list-style: none; }
+.kat-chip li { padding: 2px 8px; border-radius: 6px; background: #f0f1e9; color: #515b47; font: 400 12px/18px Inter, sans-serif; }
+.kat-harga { display: flex; align-items: baseline; justify-content: space-between; margin-top: auto; padding-top: 8px; }
+.kat-harga strong { color: #1d2618; font: 600 20px/28px 'Plus Jakarta Sans', sans-serif; }
+.kat-harga span { color: #515b47; font-size: 12px; }
+.kat-aksi { width: 100%; min-height: 40px; margin-top: 6px; }
+.kat .status-habis { margin: 6px 0 0; color: #a32e2e; font-size: 12px; font-weight: 600; }
+.kat .pesan-kosong { padding: 32px; border: 1px dashed #858f79; border-radius: 16px; background: #fff; color: #515b47; text-align: center; }
+
+.kat-halaman { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 32px; color: #515b47; font-size: 13px; }
+.kat-halaman div { display: flex; flex-wrap: wrap; gap: 6px; }
+.kat-halaman button { min-width: 36px; height: 36px; padding: 0 12px; border: 0; border-radius: 10px; background: #e9ece3; color: #1d2618; font: 600 13px/20px Inter, sans-serif; cursor: pointer; }
+.kat-halaman button:hover:not(:disabled):not(.aktif) { background: #dce5d8; }
+.kat-halaman button.aktif { background: #415325; color: #fff; }
+.kat-halaman button:disabled { opacity: .45; cursor: default; }
+
+@media (max-width: 900px) { .kat-isi { grid-template-columns: 1fr; } .kat-filter { position: static; } .kat-filter fieldset { display: flex; flex-wrap: wrap; gap: 4px 16px; } .kat-filter legend { width: 100%; } }
+@media (max-width: 560px) { .kat { padding-top: 32px; } .kat-panel { padding: 16px; } .kat-panel .pemilih-tanggal { flex-wrap: wrap; width: 100%; } .kat-tab { display: flex; overflow-x: auto; } .kat-grid { grid-template-columns: 1fr; } }
+
+/* ─── Polesan interaksi: landing, katalog, masuk/daftar ──────────────────────── */
+html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+.landing-card, .landing-category, .landing-product, .landing-step, .landing-location-card { transition: box-shadow .15s, transform .15s, border-color .15s; }
+.landing-card:hover, .landing-category:hover, .landing-product:hover, .landing-step:hover { border-color: #556a33; box-shadow: 0 12px 28px rgba(26,36,20,.1); transform: translateY(-2px); }
+.landing-button, .auth-tombol, .kat-tab button, .kat-halaman button { transition: background .15s, color .15s, box-shadow .15s; }
+.landing-button:focus-visible, .landing-category:focus-visible, .kat-tab button:focus-visible, .kat-halaman button:focus-visible, .kat-filter input:focus-visible, .auth-setuju input:focus-visible { outline: 2px solid #415325; outline-offset: 2px; }
+.landing-hero-copy h1 { text-wrap: balance; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .landing-card, .landing-category, .landing-product, .landing-step, .landing-location-card, .kat-kartu { transition: none; }
+  .landing-card:hover, .landing-category:hover, .landing-product:hover, .landing-step:hover, .kat-kartu:hover { transform: none; }
+}
+
+/* ─── Perbaikan mobile: header dan baris pencarian katalog ───────────────────── */
+@media (max-width: 900px) { .meadow-header .navigasi { flex: 1 1 100%; flex-wrap: nowrap; gap: 20px; padding-bottom: 4px; } .meadow-header .navigasi .tautan { white-space: nowrap; } }
+@media (max-width: 560px) { .meadow-header { position: static; } .kat-cari .landing-button { flex: none; width: auto; } }

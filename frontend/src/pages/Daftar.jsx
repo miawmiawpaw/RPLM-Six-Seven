@@ -1,31 +1,49 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../api/client';
+import KerangkaAuth, { Bidang, BidangSandi } from '../components/KerangkaAuth';
 
 /**
  * Halaman daftar — REQ-4.1.1, REQ-4.1.2.
  *
- * Setelah mendaftar, akun BELUM AKTIF sampai email diverifikasi. Alur verifikasi
- * idealnya lewat tautan di email, tetapi pengiriman email belum dikonfigurasi;
- * karena itu token verifikasi ditampilkan langsung agar alur dapat diuji. Ini
- * catatan pengembangan, bukan perilaku produksi.
+ * Setelah mendaftar, akun BELUM AKTIF sampai pengguna membuka tautan verifikasi di
+ * emailnya (halaman /verifikasi-email). Token tidak pernah tampil di layar.
  */
+
+const PANEL = {
+  judul: (
+    <>
+      Satu akun,
+      <br />
+      banyak cerita.
+    </>
+  ),
+  aksen: 'Petualangan menantimu.',
+  deskripsi: 'Buat akun untuk menyimpan pesanan, mengatur jadwal sewa, dan merencanakan petualangan berikutnya.',
+};
+
+/** "0812 3456 7890" / "+62812…" / "62812…" → "+628123456789" (format yang diterima backend). */
+function normalisasiTelepon(masukan) {
+  const digit = masukan.replace(/\D/g, '').replace(/^(62|0)/, '');
+  return `+62${digit}`;
+}
+
 export default function Daftar() {
   const { daftar } = useAuth();
-  const navigate = useNavigate();
 
   const [formulir, setFormulir] = useState({
     nama: '',
     email: '',
-    nomor_telepon: '',
+    telepon: '',
     password: '',
     ulangiPassword: '',
   });
+  const [setuju, setSetuju] = useState(false);
   const [galat, setGalat] = useState(null);
   const [mengirim, setMengirim] = useState(false);
-  const [tokenVerifikasi, setTokenVerifikasi] = useState(null);
-  const [verifikasiSelesai, setVerifikasiSelesai] = useState(false);
+  const [emailTujuan, setEmailTujuan] = useState(null);
+
+  const ubah = (kunci) => (e) => setFormulir({ ...formulir, [kunci]: e.target.value });
 
   async function kirim(e) {
     e.preventDefault();
@@ -38,13 +56,13 @@ export default function Daftar() {
 
     setMengirim(true);
     try {
-      const hasil = await daftar({
+      await daftar({
         nama: formulir.nama,
         email: formulir.email,
-        nomor_telepon: formulir.nomor_telepon,
+        nomor_telepon: normalisasiTelepon(formulir.telepon),
         password: formulir.password,
       });
-      setTokenVerifikasi(hasil.tokenVerifikasi);
+      setEmailTujuan(formulir.email);
     } catch (err) {
       setGalat(err.message);
     } finally {
@@ -52,126 +70,91 @@ export default function Daftar() {
     }
   }
 
-  async function verifikasiSekarang() {
-    setGalat(null);
-    try {
-      await api.auth.verifikasiEmail(tokenVerifikasi);
-      setVerifikasiSelesai(true);
-    } catch (err) {
-      setGalat(err.message);
-    }
-  }
-
-  // ─── Tahap 3: selesai ─────────────────────────────────────────────────────
-  if (verifikasiSelesai) {
+  // ─── Tahap 2: tautan verifikasi sudah dikirim ke email ────────────────────
+  if (emailTujuan) {
     return (
-      <section className="halaman halaman-sempit">
-        <h1>Akun aktif</h1>
-        <p className="pesan-sukses">Email berhasil diverifikasi. Akun Anda sudah dapat dipakai.</p>
-        <button type="button" className="tombol-utama" onClick={() => navigate('/masuk')}>
-          Masuk sekarang
-        </button>
-      </section>
-    );
-  }
-
-  // ─── Tahap 2: verifikasi email ────────────────────────────────────────────
-  if (tokenVerifikasi) {
-    return (
-      <section className="halaman halaman-sempit">
-        <h1>Verifikasi email</h1>
-        <p>
-          Akun dibuat, tetapi belum aktif. Klik tombol di bawah untuk memverifikasi email Anda.
+      <KerangkaAuth {...PANEL}>
+        <h1>Periksa email Anda</h1>
+        <p className="auth-sub">
+          Akun dibuat. Kami mengirim tautan verifikasi ke <strong>{emailTujuan}</strong>. Buka tautan itu
+          (berlaku 24 jam) untuk mengaktifkan akun.
         </p>
-
-        <div className="kotak-peringatan">
-          <p>
-            <strong>Catatan pengembangan:</strong> pengiriman email belum dikonfigurasi, sehingga
-            token verifikasi ditampilkan di sini. Pada lingkungan produksi, token ini dikirim ke
-            email Anda dan tidak boleh ditampilkan di layar.
-          </p>
-          <code className="token-panjang">{tokenVerifikasi}</code>
-        </div>
-
-        {galat && (
-          <p className="pesan-galat" role="alert">
-            {galat}
-          </p>
-        )}
-
-        <button type="button" className="tombol-utama" onClick={verifikasiSekarang}>
-          Verifikasi sekarang
-        </button>
-      </section>
+        <Link to="/masuk" className="auth-tombol">
+          Ke halaman masuk
+        </Link>
+      </KerangkaAuth>
     );
   }
 
   // ─── Tahap 1: formulir ────────────────────────────────────────────────────
   return (
-    <section className="halaman halaman-sempit">
-      <h1>Daftar</h1>
+    <KerangkaAuth {...PANEL}>
+      <h1>Buat akun baru</h1>
+      <p className="auth-sub">Bergabung dan mulai rencanakan petualanganmu.</p>
 
-      <form onSubmit={kirim} className="formulir">
-        <label>
-          Nama lengkap
+      <form onSubmit={kirim} className="auth-form">
+        <Bidang label="Nama lengkap">
           <input
+            className="auth-input"
             type="text"
             value={formulir.nama}
-            onChange={(e) => setFormulir({ ...formulir, nama: e.target.value })}
+            onChange={ubah('nama')}
             autoComplete="name"
+            placeholder="Nama lengkap"
             minLength={2}
             required
           />
-        </label>
+        </Bidang>
 
-        <label>
-          Email
+        <Bidang label="Nomor telepon">
+          <span className="auth-input auth-input-telepon">
+            <b>+62</b>
+            <input
+              type="tel"
+              value={formulir.telepon}
+              onChange={ubah('telepon')}
+              autoComplete="tel-national"
+              placeholder="812 3456 7890"
+              pattern="(\+62|62|0)?8[0-9 \-]{7,16}"
+              title="Contoh: 812 3456 7890 atau 0812 3456 7890"
+              required
+            />
+          </span>
+        </Bidang>
+
+        <Bidang label="Email">
           <input
+            className="auth-input"
             type="email"
             value={formulir.email}
-            onChange={(e) => setFormulir({ ...formulir, email: e.target.value })}
+            onChange={ubah('email')}
             autoComplete="email"
+            placeholder="nama@email.com"
             required
           />
-        </label>
+        </Bidang>
 
-        <label>
-          Nomor telepon
-          <input
-            type="tel"
-            value={formulir.nomor_telepon}
-            onChange={(e) => setFormulir({ ...formulir, nomor_telepon: e.target.value })}
-            placeholder="08123456789"
-            pattern="(\+62|62|0)8[0-9]{7,13}"
-            title="Format: 08xx atau +628xx"
-            autoComplete="tel"
-            required
-          />
-        </label>
+        <BidangSandi
+          label="Kata sandi"
+          value={formulir.password}
+          onChange={ubah('password')}
+          autoComplete="new-password"
+          minLength={8}
+          placeholder="Minimal 8 karakter"
+        />
 
-        <label>
-          Kata sandi
-          <input
-            type="password"
-            value={formulir.password}
-            onChange={(e) => setFormulir({ ...formulir, password: e.target.value })}
-            autoComplete="new-password"
-            minLength={8}
-            required
-          />
-          <small>Minimal 8 karakter.</small>
-        </label>
+        <BidangSandi
+          label="Ulangi kata sandi"
+          value={formulir.ulangiPassword}
+          onChange={ubah('ulangiPassword')}
+          autoComplete="new-password"
+          minLength={8}
+          placeholder="Ulangi kata sandi"
+        />
 
-        <label>
-          Ulangi kata sandi
-          <input
-            type="password"
-            value={formulir.ulangiPassword}
-            onChange={(e) => setFormulir({ ...formulir, ulangiPassword: e.target.value })}
-            autoComplete="new-password"
-            minLength={8}
-            required
-          />
+        <label className="auth-setuju">
+          <input type="checkbox" checked={setuju} onChange={(e) => setSetuju(e.target.checked)} required />
+          <span>Saya menyetujui Syarat &amp; Ketentuan dan Kebijakan Privasi.</span>
         </label>
 
         {galat && (
@@ -180,14 +163,14 @@ export default function Daftar() {
           </p>
         )}
 
-        <button type="submit" className="tombol-utama" disabled={mengirim}>
+        <button type="submit" className="auth-tombol" disabled={mengirim}>
           {mengirim ? 'Memproses…' : 'Daftar'}
         </button>
       </form>
 
-      <p className="tautan-bantu">
+      <p className="auth-ganti">
         Sudah punya akun? <Link to="/masuk">Masuk</Link>
       </p>
-    </section>
+    </KerangkaAuth>
   );
 }

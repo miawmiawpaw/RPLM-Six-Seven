@@ -156,7 +156,15 @@ function formatItemKatalog(a, mulai, selesai) {
 }
 
 function katalogKategori() {
-  return sukses(kategoriDummy);
+  // Unit fisik yang berstatus TERSEDIA — sama dengan yang dihitung backend (catalog.service).
+  return sukses(
+    kategoriDummy.map((k) => ({
+      ...k,
+      jumlah_tersedia: db.alat
+        .filter((a) => a.category_id === k.category_id && a.is_aktif && a.status_kondisi === 'TERSEDIA')
+        .reduce((total, a) => total + a.stok_fisik, 0),
+    }))
+  );
 }
 
 function katalogAlat(kueri) {
@@ -284,12 +292,12 @@ function authDaftar(body) {
     nomor_telepon: body.nomor_telepon || null,
     role: 'PELANGGAN',
     kata_sandi: body.password,
-    sudah_verifikasi: false,
+    sudah_verifikasi: true, // mode mock tidak mengirim email
   };
   db.pengguna.push(baru);
 
   return sukses(
-    { pengguna: penggunaAman(baru), tokenVerifikasi: tokenVerifikasiDummy },
+    { pengguna: penggunaAman(baru) },
     { message: 'Akun dibuat. Periksa email untuk verifikasi.' }
   );
 }

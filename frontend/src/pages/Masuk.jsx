@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, BERANDA_PERAN } from '../context/AuthContext';
+import KerangkaAuth, { Bidang, BidangSandi } from '../components/KerangkaAuth';
 
 /** Halaman masuk — REQ-4.1.3. */
 export default function Masuk() {
@@ -30,31 +31,37 @@ export default function Masuk() {
   }
 
   return (
-    <section className="halaman halaman-sempit">
-      <h1>Masuk</h1>
+    <KerangkaAuth
+      judul={<>Temukan alam,<br />rasakan jeda.</>}
+      aksen="Perjalanan baru dimulai di sini."
+      deskripsi="Masuk untuk mengelola penyewaan dan menyiapkan perlengkapan perjalananmu."
+    >
+      <h1>Selamat datang kembali</h1>
+      <p className="auth-sub">Masuk untuk melanjutkan petualanganmu.</p>
 
-      <form onSubmit={kirim} className="formulir">
-        <label>
-          Email
+      <form onSubmit={kirim} className="auth-form">
+        <Bidang label="Email">
           <input
+            className="auth-input"
             type="email"
             value={formulir.email}
             onChange={(e) => setFormulir({ ...formulir, email: e.target.value })}
             autoComplete="email"
+            placeholder="nama@email.com"
             required
           />
-        </label>
+        </Bidang>
 
-        <label>
-          Kata sandi
-          <input
-            type="password"
-            value={formulir.password}
-            onChange={(e) => setFormulir({ ...formulir, password: e.target.value })}
-            autoComplete="current-password"
-            required
-          />
-        </label>
+        <BidangSandi
+          label="Kata sandi"
+          value={formulir.password}
+          onChange={(e) => setFormulir({ ...formulir, password: e.target.value })}
+          autoComplete="current-password"
+        />
+
+        <div className="auth-lupa">
+          <Link to="/lupa-kata-sandi">Lupa kata sandi?</Link>
+        </div>
 
         {galat && (
           <p className="pesan-galat" role="alert">
@@ -62,17 +69,14 @@ export default function Masuk() {
           </p>
         )}
 
-        <button type="submit" className="tombol-utama" disabled={mengirim}>
+        <button type="submit" className="auth-tombol" disabled={mengirim}>
           {mengirim ? 'Memproses…' : 'Masuk'}
         </button>
       </form>
 
-      <p className="tautan-bantu">
-        <Link to="/lupa-kata-sandi">Lupa kata sandi?</Link>
+      <p className="auth-ganti">
+        Belum punya akun? <Link to="/daftar">Daftar</Link>
       </p>
-      <p className="tautan-bantu">
-        Belum punya akun? <Link to="/daftar">Daftar di sini</Link>
-      </p>
-    </section>
+    </KerangkaAuth>
   );
 }

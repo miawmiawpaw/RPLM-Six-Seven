@@ -12,6 +12,7 @@ import DetailAlat from './pages/DetailAlat';
 // ─── Halaman autentikasi ─────────────────────────────────────────────────────
 import Masuk from './pages/Masuk';
 import Daftar from './pages/Daftar';
+import VerifikasiEmail from './pages/VerifikasiEmail';
 import LupaKataSandi from './pages/LupaKataSandi';
 import AturUlangKataSandi from './pages/AturUlangKataSandi';
 
@@ -42,31 +43,33 @@ import LaporanAdmin from './pages/admin/LaporanAdmin';
 export default function App() {
   return (
     <Routes>
+      {/* ── Autentikasi: hanya tamu, tanpa header/footer (Figma: layar penuh) ── */}
+      <Route
+        path="masuk"
+        element={
+          <RuteTamu>
+            <Masuk />
+          </RuteTamu>
+        }
+      />
+      <Route
+        path="daftar"
+        element={
+          <RuteTamu>
+            <Daftar />
+          </RuteTamu>
+        }
+      />
+
       <Route element={<TataLetak />}>
         {/* ── Publik ─────────────────────────────────────────────────────── */}
         <Route index element={<Beranda />} />
         <Route path="katalog" element={<Katalog />} />
         <Route path="katalog/:itemId" element={<DetailAlat />} />
 
-        {/* ── Autentikasi: hanya tamu ────────────────────────────────────── */}
-        <Route
-          path="masuk"
-          element={
-            <RuteTamu>
-              <Masuk />
-            </RuteTamu>
-          }
-        />
-        <Route
-          path="daftar"
-          element={
-            <RuteTamu>
-              <Daftar />
-            </RuteTamu>
-          }
-        />
         {/* Lupa & atur ulang sandi tetap dapat diakses pengguna yang sudah masuk,
             karena tautan dari email bisa dibuka di peramban yang masih bersesi. */}
+        <Route path="verifikasi-email" element={<VerifikasiEmail />} />
         <Route path="lupa-kata-sandi" element={<LupaKataSandi />} />
         <Route path="atur-ulang-kata-sandi" element={<AturUlangKataSandi />} />
 
