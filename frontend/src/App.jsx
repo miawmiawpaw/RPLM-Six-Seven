@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 
 import TataLetak from './routes/TataLetak';
 import { RuteTerlindungi, RuteTamu } from './routes/PenjagaRute';
@@ -191,6 +191,7 @@ function TidakDitemukan() {
     <section className="halaman">
       <h1>Halaman tidak ditemukan</h1>
       <p>Alamat yang Anda tuju tidak tersedia atau sudah dipindahkan.</p>
+      <Link to="/" className="tombol-utama">Kembali ke beranda</Link>
     </section>
   );
 }

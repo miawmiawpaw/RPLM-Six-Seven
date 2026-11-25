@@ -13,6 +13,13 @@ import {
 } from '../utils/format';
 import LiniMasaStatus from '../components/LiniMasaStatus';
 
+/** Daftar pesanan yang boleh dibuka tiap peran (tautan "kembali"). */
+const DAFTAR_PESANAN = {
+  [PERAN.PELANGGAN]: '/pesanan-saya',
+  [PERAN.PETUGAS]: '/petugas/tugas',
+  [PERAN.ADMIN]: '/admin/pesanan',
+};
+
 /**
  * Detail pesanan — REQ-4.2.10, REQ-4.4.2, REQ-4.5.3, REQ-4.7.2.
  *
@@ -136,7 +143,7 @@ export default function DetailPesanan() {
     return (
       <section className="halaman">
         <p className="pesan-galat">{galat}</p>
-        <Link to="/pesanan-saya">Kembali ke daftar pesanan</Link>
+        <Link to={DAFTAR_PESANAN[peran]}>Kembali ke daftar pesanan</Link>
       </section>
     );
   }
@@ -152,7 +159,7 @@ export default function DetailPesanan() {
   return (
     <section className="halaman">
       <nav className="remah">
-        <Link to={peran === PERAN.PELANGGAN ? '/pesanan-saya' : '/admin/pesanan'}>Pesanan</Link> /{' '}
+        <Link to={DAFTAR_PESANAN[peran]}>{peran === PERAN.PETUGAS ? 'Tugas' : 'Pesanan'}</Link> /{' '}
         <span>#{p.kode_pesanan || p.order_id}</span>
       </nav>
 

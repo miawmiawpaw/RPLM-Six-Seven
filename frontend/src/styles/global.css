@@ -1742,5 +1742,36 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 }
 
 /* ─── Perbaikan mobile: header dan baris pencarian katalog ───────────────────── */
-@media (max-width: 900px) { .meadow-header .navigasi { flex: 1 1 100%; flex-wrap: nowrap; gap: 20px; padding-bottom: 4px; } .meadow-header .navigasi .tautan { white-space: nowrap; } }
-@media (max-width: 560px) { .meadow-header { position: static; } .kat-cari .landing-button { flex: none; width: auto; } }
+@media (max-width: 560px) { .kat-cari .landing-button { flex: none; width: auto; } }
+
+/* ─── Navigasi: penanda aktif, lewati ke konten, menu mobile ─────────────────── */
+.lompat { position: absolute; left: 16px; top: -64px; z-index: 100; padding: 10px 16px; border-radius: 999px; background: #415325; color: #fff; font: 600 14px/20px Inter, sans-serif; text-decoration: none; }
+.lompat:focus { top: 12px; }
+.konten:focus { outline: none; }
+.meadow-header .navigasi .tautan[aria-current="page"] { color: #415325; font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 8px; }
+.meadow-header .navigasi .tautan:focus-visible, .meadow-header .nama-pengguna:focus-visible, .meadow-header .tautan-keranjang:focus-visible, .meadow-header .tombol-kecil:focus-visible, .tombol-menu:focus-visible { outline: 2px solid #415325; outline-offset: 3px; }
+.meadow-header .nama-pengguna { max-width: 140px; overflow: hidden; color: #415325; font: 500 14px/20px Inter, sans-serif; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
+.meadow-header .nama-pengguna:hover { text-decoration: underline; }
+.meadow-header .navigasi { gap: 20px; flex-wrap: nowrap; }
+.meadow-header .navigasi .tautan { white-space: nowrap; }
+.nav-akun, .tombol-menu { display: none; }
+.tombol-menu { align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1px solid #556a33; border-radius: 999px; background: transparent; color: #415325; cursor: pointer; }
+.aksi-akun { display: flex; align-items: center; gap: 12px; }
+
+@media (max-width: 1280px) {
+  .meadow-header { flex-wrap: wrap; padding: 12px 24px; }
+  .tombol-menu { display: inline-flex; }
+  .meadow-header .aksi-header { margin-left: auto; }
+  .aksi-akun { display: none; }
+  .meadow-header .navigasi { display: none; order: 3; flex: 1 1 100%; flex-direction: column; align-items: stretch; gap: 0; overflow: visible; padding: 8px 0 4px; border-top: 1px solid #d7dccd; }
+  .meadow-header .navigasi.terbuka { display: flex; }
+  .meadow-header .navigasi .tautan { display: flex; align-items: center; min-height: 44px; font-size: 16px; line-height: 24px; border-bottom: 1px solid #ece9df; }
+  .nav-akun { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; }
+  .nav-akun .nama-pengguna { max-width: none; }
+}
+@media (max-width: 560px) {
+  .meadow-header { padding: 12px 16px; }
+  .meadow-header .teks-keranjang { display: none; }
+  .meadow-header .tautan-keranjang { padding: 0 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .lompat { transition: none; } }
