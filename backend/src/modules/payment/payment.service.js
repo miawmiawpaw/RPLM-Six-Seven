@@ -84,10 +84,20 @@ function petakanStatus(transactionStatus, fraudStatus) {
 }
 
 /**
+ * Kunci idempotensi satu notifikasi. Midtrans memakai transaction_id yang SAMA untuk
+ * seluruh siklus transaksi (pending lalu settlement), jadi transaction_id saja tidak
+ * cukup: notifikasi settlement akan salah dianggap duplikat dari pending dan pesanan
+ * tidak pernah menjadi DIBAYAR. Status ikut dalam kunci.
+ */
+function kunciIdempotensi({ transaction_id: id, transaction_status: status, fraud_status: fraud }) {
+  return `${id}:${status}${fraud ? `/${fraud}` : ''}`.slice(0, 100);
+}
+
+/**
  * Tangani notifikasi Midtrans — REQ-4.4.2, REQ-4.4.7.
  *
- * IDEMPOTEN: notifikasi yang sama dapat dikirim berulang oleh Midtrans. Bila
- * referensi_gateway sudah pernah diproses, permintaan berikutnya tidak mengubah apa pun.
+ * IDEMPOTEN: notifikasi yang sama dapat dikirim berulang oleh Midtrans. Bila kunci
+ * (transaction_id + status) sudah pernah diproses, permintaan berikutnya tidak mengubah apa pun.
  *
  * @param {object} params
  * @param {Buffer|object|string} params.rawBody
@@ -121,20 +131,32 @@ async function tanganiNotifikasi({ rawBody, ip = null }) {
 
   return db.transaction(async (trx) => {
     // ─── Idempotensi (FR-034) ────────────────────────────────────────────────
-    const sudahAda = await trx('Payment').where({ referensi_gateway: transactionId }).first();
-    if (sudahAda) {
-      return { status: 'diabaikan', alasan: 'NOTIFIKASI_DUPLIKAT', payment_id: String(sudahAda.payment_id) };
-    }
-
-    const [paymentId] = await trx('Payment').insert({
-      order_id: pesanan.order_id,
-      metode: paymentType || 'MIDTRANS',
-      status: statusPembayaran,
-      nominal: Number(grossAmount),
-      referensi_gateway: transactionId,
-      payload_gateway: JSON.stringify(body).slice(0, 60000),
-      waktu: trx.fn.now(),
+    const kunci = kunciIdempotensi(body);
+    const duplikat = (sudahAda) => ({
+      status: 'diabaikan',
+      alasan: 'NOTIFIKASI_DUPLIKAT',
+      payment_id: String(sudahAda.payment_id),
     });
+
+    const sudahAda = await trx('Payment').where({ referensi_gateway: kunci }).first();
+    if (sudahAda) return duplikat(sudahAda);
+
+    let paymentId;
+    try {
+      [paymentId] = await trx('Payment').insert({
+        order_id: pesanan.order_id,
+        metode: paymentType || 'MIDTRANS',
+        status: statusPembayaran,
+        nominal: Number(grossAmount),
+        referensi_gateway: kunci,
+        payload_gateway: JSON.stringify(body).slice(0, 60000),
+        waktu: trx.fn.now(),
+      });
+    } catch (err) {
+      // Dua notifikasi identik tiba bersamaan: indeks unik menahan yang kedua.
+      if (err.code !== 'ER_DUP_ENTRY') throw err;
+      return duplikat(await trx('Payment').where({ referensi_gateway: kunci }).first());
+    }
 
     await catatAudit({
       trx,
@@ -251,6 +273,7 @@ async function buatTransaksiPembayaran({ orderId, userId }) {
 }
 
 module.exports = {
+  kunciIdempotensi,
   verifikasiSignature,
   petakanStatus,
   tanganiNotifikasi,
