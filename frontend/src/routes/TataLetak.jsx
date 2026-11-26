@@ -71,7 +71,10 @@ export default function TataLetak() {
 
   const akun = masukAkun ? (
     <>
-      <Link to="/profil" className="nama-pengguna" title="Profil saya">{pengguna?.nama}</Link>
+      <Link to="/profil" className="nama-pengguna" title="Profil saya">
+        <span className="avatar" aria-hidden="true">{(pengguna?.nama || '?').trim().charAt(0).toUpperCase()}</span>
+        <span>{pengguna?.nama}</span>
+      </Link>
       <button type="button" onClick={tanganiKeluar} className="tombol-kecil">Keluar</button>
     </>
   ) : (
