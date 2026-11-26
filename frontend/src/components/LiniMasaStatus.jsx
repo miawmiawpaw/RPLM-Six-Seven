@@ -1,4 +1,5 @@
 import { labelStatus } from '../utils/format';
+import { IkonCentang } from './Ikon';
 
 /**
  * Lini masa status pesanan — SRS §2.8.
@@ -43,7 +44,7 @@ export default function LiniMasaStatus({ status }) {
         return (
           <li key={langkah.status} className={`langkah ${keadaan}`}>
             <span className="penanda" aria-hidden="true">
-              {i < indeksSekarang ? '✓' : i + 1}
+              {i < indeksSekarang ? <IkonCentang ukuran="sm" /> : i + 1}
             </span>
             <span className="label-langkah">{langkah.label}</span>
             {i === indeksSekarang && <span className="sr-only">(status saat ini)</span>}

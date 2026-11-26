@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useKeranjang } from '../context/CartContext';
 import { rupiah, hariIniIso, durasiHari } from '../utils/format';
+import { IkonKurang, IkonTambah } from '../components/Ikon';
 import PemilihTanggal from '../components/PemilihTanggal';
 /**
  * Detail alat — REQ-4.2.4, REQ-4.2.5.
@@ -254,7 +255,7 @@ export default function DetailAlat() {
                   disabled={kuantitas <= 1}
                   onClick={() => setKuantitas((n) => Math.max(1, n - 1))}
                 >
-                  −
+                  <IkonKurang />
                 </button>
                 <input
                   type="number"
@@ -272,7 +273,7 @@ export default function DetailAlat() {
                   disabled={kuantitas >= maks}
                   onClick={() => setKuantitas((n) => Math.min(maks, n + 1))}
                 >
-                  +
+                  <IkonTambah />
                 </button>
               </div>
             </div>

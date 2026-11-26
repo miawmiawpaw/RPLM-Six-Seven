@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, PERAN } from '../context/AuthContext';
 import { useKeranjang } from '../context/CartContext';
 import logo from '../../assets/Rental Camping/Footer Logo.svg';
-import cartIcon from '../../assets/Rental Camping/Cart Icon.svg';
+import { IkonKeranjang, IkonMenu, IkonPanahBawah, IkonTutup } from '../components/Ikon';
 import footerArtwork from '../../assets/Meadow Hills Footer Artwork.svg';
 /**
  * Kerangka halaman: header, navigasi per peran, dan wadah konten.
@@ -81,9 +81,7 @@ function MenuAkun({ pengguna, peran, onKeluar }) {
       <button ref={tombol} type="button" className="akun-tombol" aria-expanded={buka} aria-controls="menu-akun" onClick={() => setBuka((v) => !v)}>
         <span className="avatar" aria-hidden="true">{inisial}</span>
         <span className="sr-only">Menu akun {pengguna?.nama}</span>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M2.5 4.5 6 8l3.5-3.5" />
-        </svg>
+        <IkonPanahBawah ukuran="sm" />
       </button>
       {buka && (
         <div id="menu-akun" className="akun-panel">
@@ -163,16 +161,14 @@ export default function TataLetak() {
           <span className="sr-only" role="status" aria-live="polite">{totalItem > 0 ? `Keranjang berisi ${totalItem} item.` : ''}</span>
           {(!masukAkun || peran === PERAN.PELANGGAN) && (
             <Link to="/keranjang" className="tautan-keranjang" aria-label={totalItem > 0 ? `Keranjang, ${totalItem} item` : 'Keranjang'}>
-              <img src={cartIcon} alt="" width="16" height="16" />{totalItem > 0 && <span className="lencana">{totalItem}</span>}
+              <IkonKeranjang />{totalItem > 0 && <span className="lencana">{totalItem}</span>}
             </Link>
           )}
           <div className="aksi-akun">
             {masukAkun ? <MenuAkun pengguna={pengguna} peran={peran} onKeluar={tanganiKeluar} /> : <Link to="/masuk" className="tombol-kecil">Masuk</Link>}
           </div>
           <button type="button" className="tombol-menu" aria-expanded={terbuka} aria-controls="navigasi-utama" aria-label={terbuka ? 'Tutup menu' : 'Buka menu'} onClick={() => setTerbuka((v) => !v)}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              {terbuka ? <path d="M5 5l10 10M15 5L5 15" /> : <path d="M3 6h14M3 10h14M3 14h14" />}
-            </svg>
+            {terbuka ? <IkonTutup /> : <IkonMenu />}
           </button>
         </div>
       </header>

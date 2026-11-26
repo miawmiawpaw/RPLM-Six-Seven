@@ -1961,3 +1961,20 @@ h1, h2, h3 { text-wrap: balance; }
   .meadow-header .aksi-header { gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .akun-tombol svg { transition: none; } }
+
+/* ─── Ikon (Phosphor): warna dan perataan seragam ────────────────────────────── */
+svg.ph, [class^="ph-"] { flex: none; }
+.landing-icon svg, .landing-category-icon svg { color: #415325; }
+.landing-search label > span > svg { flex: none; color: #515b47; }
+.landing-heading > a svg, .landing-category strong svg, .auth-kembali svg { vertical-align: -0.2em; transition: transform .15s; }
+.landing-heading > a:hover svg, .landing-category:hover strong svg { transform: translateX(2px); }
+.auth-kembali { display: inline-flex; align-items: center; gap: 4px; }
+.auth-mata svg { display: block; }
+.det-stepper button svg { display: block; margin: auto; }
+.kat-tombol svg { vertical-align: -0.2em; margin-left: 2px; }
+.meadow-header .tautan-keranjang svg { display: block; color: #415325; }
+.tombol-menu svg { display: block; }
+.akun-tombol svg { color: #515b47; }
+@media (prefers-reduced-motion: reduce) {
+  .landing-heading > a:hover svg, .landing-category:hover strong svg { transform: none; }
+}

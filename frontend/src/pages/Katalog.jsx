@@ -6,6 +6,7 @@ import PemilihTanggal from '../components/PemilihTanggal';
 import { fotoPaket } from '../utils/fotoProduk';
 import { useAuth, PERAN } from '../context/AuthContext';
 import { useKeranjang } from '../context/CartContext';
+import { IkonCentang } from '../components/Ikon';
 
 /** Nomor halaman ringkas: 1 … sekarang-1 sekarang sekarang+1 … terakhir. */
 function nomorHalaman(sekarang, total) {
@@ -64,7 +65,7 @@ export default function Katalog() {
     const kunci = `${entri.tipe}:${entri.id}`;
     return (
       <button type="button" className="landing-button kat-tombol" disabled={!aktif} onClick={() => tambahKeKeranjang(entri)}>
-        {baruDitambah === kunci ? <>Ditambahkan <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2.5 7.5 5.5 10.5 11.5 3.5" /></svg></> : '+ Keranjang'}
+        {baruDitambah === kunci ? <>Ditambahkan <IkonCentang ukuran="sm" /></> : '+ Keranjang'}
       </button>
     );
   }

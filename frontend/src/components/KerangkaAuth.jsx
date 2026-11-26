@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/Rental Camping/Footer Logo.svg';
+import { IkonMata, IkonMataCoret, IkonPanahKiri } from './Ikon';
 
 /**
  * Kerangka halaman masuk & daftar — Figma "Login / Register — Desktop".
@@ -30,7 +31,7 @@ export default function KerangkaAuth({ judul, aksen, deskripsi, children }) {
       <main className="auth-konten">
         <div className="auth-kolom">
           <Link to="/" className="auth-kembali">
-            <span aria-hidden="true">←</span> Kembali ke beranda
+            <IkonPanahKiri ukuran="sm" /> Kembali ke beranda
           </Link>
           <section className="auth-kartu">{children}</section>
           <p className="auth-hak">© 2026 Rental Camping Indonesia</p>
@@ -76,11 +77,7 @@ export function BidangSandi({ label, name = 'password', value, onChange, autoCom
           aria-label={tampil ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
           aria-pressed={tampil}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M1.67 8s2.13-3.67 6.33-3.67S14.33 8 14.33 8s-2.13 3.67-6.33 3.67S1.67 8 1.67 8Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-            <circle cx="8" cy="8" r="1.67" stroke="currentColor" strokeWidth="1.2" />
-            {tampil && <path d="M2.5 13.5 13.5 2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />}
-          </svg>
+          {tampil ? <IkonMataCoret /> : <IkonMata />}
         </button>
       </div>
     </div>
