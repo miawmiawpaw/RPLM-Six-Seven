@@ -73,6 +73,9 @@ export default function AturUlangKataSandi() {
           Token dari email
           <input
             type="text"
+            name="token"
+            autoComplete="off"
+            spellCheck={false}
             value={token}
             onChange={(e) => setToken(e.target.value)}
             placeholder="Tempel token di sini"
@@ -84,6 +87,7 @@ export default function AturUlangKataSandi() {
           Kata sandi baru
           <input
             type="password"
+            name="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
@@ -97,6 +101,7 @@ export default function AturUlangKataSandi() {
           Ulangi kata sandi baru
           <input
             type="password"
+            name="ulangi_password"
             value={ulangiPassword}
             onChange={(e) => setUlangiPassword(e.target.value)}
             autoComplete="new-password"

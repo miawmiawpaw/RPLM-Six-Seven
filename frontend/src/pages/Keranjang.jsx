@@ -179,6 +179,8 @@ export default function Keranjang() {
                 <td>
                   <input
                     type="number"
+                    name="kuantitas"
+                    inputMode="numeric"
                     min="1"
                     value={b.kuantitas}
                     onChange={(e) => ubahKuantitas(b.tipe, b.id, Number(e.target.value))}

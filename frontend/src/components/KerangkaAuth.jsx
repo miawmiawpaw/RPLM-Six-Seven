@@ -51,7 +51,7 @@ export function Bidang({ label, children }) {
 }
 
 /** Bidang kata sandi dengan tombol tampil/sembunyikan. */
-export function BidangSandi({ label, value, onChange, autoComplete, minLength, placeholder = 'Masukkan kata sandi' }) {
+export function BidangSandi({ label, name = 'password', value, onChange, autoComplete, minLength, placeholder = 'Masukkan kata sandi' }) {
   const [tampil, setTampil] = useState(false);
   const id = useId();
   return (
@@ -60,6 +60,7 @@ export function BidangSandi({ label, value, onChange, autoComplete, minLength, p
       <div className="auth-input auth-input-sandi">
         <input
           id={id}
+          name={name}
           type={tampil ? 'text' : 'password'}
           value={value}
           onChange={onChange}

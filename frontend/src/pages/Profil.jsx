@@ -109,6 +109,8 @@ export default function Profil() {
           Nama lengkap
           <input
             type="text"
+            name="nama"
+            autoComplete="name"
             value={formulir.nama}
             onChange={(e) => setFormulir({ ...formulir, nama: e.target.value })}
             minLength={2}
@@ -120,6 +122,9 @@ export default function Profil() {
           Nomor telepon
           <input
             type="tel"
+            name="nomor_telepon"
+            inputMode="tel"
+            autoComplete="tel"
             value={formulir.nomor_telepon}
             onChange={(e) => setFormulir({ ...formulir, nomor_telepon: e.target.value })}
             placeholder="08123456789"
@@ -133,6 +138,9 @@ export default function Profil() {
           Nomor identitas (KTP/KTM)
           <input
             type="text"
+            name="nomor_identitas"
+            autoComplete="off"
+            spellCheck={false}
             value={formulir.nomor_identitas}
             onChange={(e) => setFormulir({ ...formulir, nomor_identitas: e.target.value })}
             placeholder="Opsional — ditunjukkan saat pengambilan alat"
@@ -143,6 +151,8 @@ export default function Profil() {
           Alamat
           <textarea
             rows={3}
+            name="alamat"
+            autoComplete="street-address"
             value={formulir.alamat}
             onChange={(e) => setFormulir({ ...formulir, alamat: e.target.value })}
             placeholder="Alamat tempat tinggal saat ini"

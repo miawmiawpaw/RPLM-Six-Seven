@@ -44,6 +44,8 @@ export default function Masuk() {
           <input
             className="auth-input"
             type="email"
+            name="email"
+            spellCheck={false}
             value={formulir.email}
             onChange={(e) => setFormulir({ ...formulir, email: e.target.value })}
             autoComplete="email"

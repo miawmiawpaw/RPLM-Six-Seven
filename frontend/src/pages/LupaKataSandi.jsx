@@ -71,6 +71,8 @@ export default function LupaKataSandi() {
           Email
           <input
             type="email"
+            name="email"
+            spellCheck={false}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"

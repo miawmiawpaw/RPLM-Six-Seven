@@ -23,6 +23,7 @@ export default function PemilihTanggal({ mulai, selesai, minMulai, onBerubah }) 
         Mulai
         <input
           type="date"
+          name="mulai"
           value={mulai}
           min={minMulai}
           onChange={(e) => ubahMulai(e.target.value)}
@@ -34,6 +35,7 @@ export default function PemilihTanggal({ mulai, selesai, minMulai, onBerubah }) 
         Selesai
         <input
           type="date"
+          name="selesai"
           value={selesai}
           min={mulai || minMulai}
           onChange={(e) => ubahSelesai(e.target.value)}

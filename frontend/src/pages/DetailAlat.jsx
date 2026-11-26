@@ -149,6 +149,8 @@ export default function DetailAlat() {
                   Jumlah
                   <input
                     type="number"
+                    name="kuantitas"
+                    inputMode="numeric"
                     min="1"
                     max={sisaTersedia ?? 99}
                     value={kuantitas}

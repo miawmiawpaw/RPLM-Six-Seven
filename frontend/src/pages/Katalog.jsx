@@ -146,7 +146,9 @@ export default function Katalog() {
           </label>
           <input
             id="cari"
+            name="q"
             type="search"
+            autoComplete="off"
             value={inputCari}
             onChange={(e) => setInputCari(e.target.value)}
             placeholder="Cari nama atau merek alat…"

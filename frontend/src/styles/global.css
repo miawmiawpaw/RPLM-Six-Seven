@@ -1825,3 +1825,6 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .tombol-tautan:focus-visible { outline: 2px solid #415325; outline-offset: 2px; }
 .kat-tab button[aria-pressed='true'] { background: #fff; color: #1d2618; box-shadow: 0 1px 3px rgba(26,36,20,.12); }
 .kat-halaman > div > span { display: inline-flex; min-width: 24px; justify-content: center; color: #515b47; }
+
+/* Angka sejajar di kolom tabel */
+.tabel td, .tabel th { font-variant-numeric: tabular-nums; }

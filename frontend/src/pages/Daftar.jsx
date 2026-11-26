@@ -97,10 +97,11 @@ export default function Daftar() {
           <input
             className="auth-input"
             type="text"
+            name="nama"
             value={formulir.nama}
             onChange={ubah('nama')}
             autoComplete="name"
-            placeholder="Nama lengkap"
+            placeholder="Mis. Siti Rahma…"
             minLength={2}
             required
           />
@@ -111,6 +112,8 @@ export default function Daftar() {
             <b>+62</b>
             <input
               type="tel"
+              name="telepon"
+              inputMode="tel"
               value={formulir.telepon}
               onChange={ubah('telepon')}
               autoComplete="tel-national"
@@ -126,6 +129,8 @@ export default function Daftar() {
           <input
             className="auth-input"
             type="email"
+            name="email"
+            spellCheck={false}
             value={formulir.email}
             onChange={ubah('email')}
             autoComplete="email"
@@ -144,6 +149,7 @@ export default function Daftar() {
         />
 
         <BidangSandi
+          name="ulangi_password"
           label="Ulangi kata sandi"
           value={formulir.ulangiPassword}
           onChange={ubah('ulangiPassword')}
@@ -153,7 +159,7 @@ export default function Daftar() {
         />
 
         <label className="auth-setuju">
-          <input type="checkbox" checked={setuju} onChange={(e) => setSetuju(e.target.checked)} required />
+          <input type="checkbox" name="setuju" checked={setuju} onChange={(e) => setSetuju(e.target.checked)} required />
           <span>Saya menyetujui Syarat &amp; Ketentuan dan Kebijakan Privasi.</span>
         </label>
 
