@@ -155,7 +155,8 @@ async function tanganiNotifikasi({ rawBody, ip = null }) {
     } catch (err) {
       // Dua notifikasi identik tiba bersamaan: indeks unik menahan yang kedua.
       if (err.code !== 'ER_DUP_ENTRY') throw err;
-      return duplikat(await trx('Payment').where({ referensi_gateway: kunci }).first());
+      // forUpdate: pembacaan biasa memakai snapshot lama transaksi ini dan tidak melihat baris pemenang.
+      return duplikat(await trx('Payment').where({ referensi_gateway: kunci }).forUpdate().first());
     }
 
     await catatAudit({
