@@ -1961,8 +1961,3 @@ h1, h2, h3 { text-wrap: balance; }
   .meadow-header .aksi-header { gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .akun-tombol svg { transition: none; } }
-
-/* Menu rapat ke logo; aksi tetap di kanan */
-@media (min-width: 1025px) {
-  .meadow-header .navigasi { justify-content: flex-start; padding-left: 24px; }
-}
