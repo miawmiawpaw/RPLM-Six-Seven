@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, PERAN } from '../context/AuthContext';
 import { useKeranjang } from '../context/CartContext';
 import logo from '../../assets/Rental Camping/Footer Logo.svg';
@@ -15,14 +15,14 @@ import footerArtwork from '../../assets/Meadow Hills Footer Artwork.svg';
 
 const PUBLIK = [
   { ke: '/katalog', label: 'Katalog Alat' },
-  { ke: '/#paket', label: 'Paket Sewa' },
+  { ke: '/katalog?tab=paket', label: 'Paket Sewa' },
   { ke: '/#cara-sewa', label: 'Cara Sewa' },
   { ke: '/#bantuan', label: 'Bantuan' },
 ];
 
 const MENU = {
-  // Pelanggan yang sudah masuk tidak butuh anchor pemasaran: paket ada di tab Katalog, bantuan di footer.
-  [PERAN.PELANGGAN]: [PUBLIK[0], { ke: '/pesanan-saya', label: 'Pesanan Saya' }],
+  // Urutan sama dengan tamu; hanya "Cara Sewa" berganti jadi "Pesanan Saya" agar posisi menu tidak melompat setelah masuk.
+  [PERAN.PELANGGAN]: [PUBLIK[0], PUBLIK[1], { ke: '/pesanan-saya', label: 'Pesanan Saya' }, PUBLIK[3]],
   [PERAN.PETUGAS]: [{ ke: '/petugas/tugas', label: 'Tugas' }],
   [PERAN.ADMIN]: [
     { ke: '/admin/dasbor', label: 'Dasbor' },
@@ -32,6 +32,18 @@ const MENU = {
     { ke: '/admin/laporan', label: 'Laporan' },
   ],
 };
+
+/** Katalog Alat dan Paket Sewa sama-sama di /katalog; yang membedakan hanya ?tab=paket. Anchor (#) tidak pernah aktif. */
+function menuAktif(ke, { pathname, search }) {
+  if (ke.includes('#')) return false;
+  const [jalur, kueri = ''] = ke.split('?');
+  const paket = new URLSearchParams(search).get('tab') === 'paket';
+  if (jalur === '/katalog') {
+    if (!(pathname === '/katalog' || pathname.startsWith('/katalog/'))) return false;
+    return kueri ? pathname === '/katalog' && paket : !(pathname === '/katalog' && paket);
+  }
+  return pathname === jalur || pathname.startsWith(`${jalur}/`);
+}
 
 const LABEL_PERAN = { [PERAN.PELANGGAN]: 'Pelanggan', [PERAN.PETUGAS]: 'Petugas', [PERAN.ADMIN]: 'Admin' };
 
@@ -142,9 +154,9 @@ export default function TataLetak() {
       <header className="header meadow-header">
         <Link to="/" className="merek"><img src={logo} alt="" width="40" height="40" /><span translate="no"><strong>RENTAL CAMPING</strong><small>OUTDOOR RENTAL</small></span></Link>
         <nav id="navigasi-utama" className={terbuka ? 'navigasi terbuka' : 'navigasi'} aria-label="Navigasi utama">
-          {menu.map((m) => m.ke.includes('#')
-            ? <Link key={m.ke} to={m.ke} className="tautan">{m.label}</Link>
-            : <NavLink key={m.ke} to={m.ke} className="tautan">{m.label}</NavLink>)}
+          {menu.map((m) => (
+            <Link key={m.ke} to={m.ke} className="tautan" aria-current={menuAktif(m.ke, lokasi) ? 'page' : undefined}>{m.label}</Link>
+          ))}
           <div className="nav-akun">{akun}</div>
         </nav>
         <div className="aksi-header">
