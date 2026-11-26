@@ -1777,3 +1777,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
   .meadow-header .tautan-keranjang { padding: 0 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .lompat { transition: none; } }
+
+/* ─── Foto paket di landing ──────────────────────────────────────────────────── */
+.landing-product-art { position: relative; }
+.landing-product-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 90%; }

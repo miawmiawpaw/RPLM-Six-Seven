@@ -4,5 +4,6 @@
  * shortcut: pencocokan nama, ganti dengan kolom foto di tabel Bundle bila admin perlu mengunggah sendiri.
  */
 export function fotoPaket(nama = '') {
-  return /\b2 orang|duo|solo/i.test(nama) ? '/photos/tent2.jpg' : '/photos/tentfam.jpg';
+  if (/solo|ultralight/i.test(nama)) return '/photos/carrier.jpg';
+  return /\b2 orang|duo/i.test(nama) ? '/photos/tent2.jpg' : '/photos/tentfam.jpg';
 }
