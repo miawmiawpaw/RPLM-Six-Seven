@@ -1816,5 +1816,5 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 
 /* ─── Footer: teks terbaca di atas ilustrasi (kontras AA) ────────────────────── */
 .meadow-footer-main { position: relative; }
-.meadow-footer-main::before { content: ''; position: absolute; z-index: -1; top: -24px; bottom: -120px; left: 50%; width: 100vw; margin-left: -50vw; background: linear-gradient(180deg, rgba(37,48,25,0), rgba(37,48,25,.72) 24px); pointer-events: none; }
+.meadow-footer-main::before { content: ''; position: absolute; z-index: -1; top: -24px; bottom: -120px; left: 50%; width: 100vw; margin-left: -50vw; background: linear-gradient(180deg, rgba(37,48,25,0), rgba(37,48,25,.1) 24px); pointer-events: none; }
 .meadow-footer-links a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
