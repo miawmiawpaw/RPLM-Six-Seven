@@ -1,5 +1,4 @@
 const db = require('../../config/database');
-const { STATUS_PESANAN_AKTIF } = require('../../constants');
 
 /**
  * Availability Engine — REQ-4.2.4, REQ-4.2.5.
@@ -33,7 +32,6 @@ async function hitungUnitTerpakai(trx, itemIds, tanggalMulai, tanggalSelesai) {
 
   const baris = await trx('StockReservation')
     .whereIn('StockReservation.item_id', itemIds)
-    .whereIn('StockReservation.status', STATUS_PESANAN_AKTIF)
     // Syarat irisan rentang — inklusif pada kedua ujung.
     .where('StockReservation.tanggal_mulai', '<=', tanggalSelesai)
     .where('StockReservation.tanggal_selesai', '>=', tanggalMulai)
@@ -42,7 +40,9 @@ async function hitungUnitTerpakai(trx, itemIds, tanggalMulai, tanggalSelesai) {
     // menentukan sebuah reservasi masih mengikat stok hanyalah status 'AKTIF';
     // pesanan batal atau kedaluwarsa mengubahnya menjadi 'DILEPAS'.
     .where('StockReservation.status', 'AKTIF')
-    .sum({ terpakai: 'StockReservation.kuantitas' });
+    .select('StockReservation.item_id')
+    .sum({ terpakai: 'StockReservation.kuantitas' })
+    .groupBy('StockReservation.item_id');
 
   return new Map(baris.map((b) => [Number(b.item_id), Number(b.terpakai)]));
 }

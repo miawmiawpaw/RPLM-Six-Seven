@@ -93,3 +93,84 @@ test('akun terkunci setelah 5 kali gagal, bahkan dengan kata sandi benar', async
   }
   await assert.rejects(() => authService.masuk({ email: 'kunci@uji.test', password: 'Sandi#12345' }), { name: 'ForbiddenError' });
 });
+
+// ─── Pesanan dan stok ─────────────────────────────────────────────────────────
+
+const orderService = require('../src/modules/order/order.service');
+const { formatTanggal } = require('../src/utils/helpers');
+
+const hariKe = (n) => formatTanggal(new Date(Date.now() + n * 86400000));
+const buatAlat = async (kode, stok, tarif = 10000) => {
+  const [id] = await db('Item').insert({ kode_barang: kode, nama: kode, category_id: 1, stok_fisik: stok, tarif_harian: tarif });
+  return id;
+};
+const pesan = (userId, itemId, kuantitas = 1, mulai = hariKe(10), selesai = hariKe(12)) =>
+  orderService.buatPesanan({ userId, barisKeranjang: [{ tipe: 'ITEM', item_id: itemId, kuantitas }], tanggalMulai: mulai, tanggalSelesai: selesai });
+const statusReservasi = async (orderId) => (await db('StockReservation').where({ order_id: orderId }).first()).status;
+
+test('total pesanan = tarif x kuantitas x hari (tanggal selesai inklusif) dan stok terikat', async (t) => {
+  if (lewati(t)) return;
+  const user = await buatPengguna('total@uji.test');
+  const alat = await buatAlat('UJI-TOTAL', 5, 10000);
+  const p = await pesan(user, alat, 2); // hari ke-10 sampai ke-12 = 3 hari
+  assert.equal(p.total_akhir, 60000);
+  assert.equal(p.status, 'MENUNGGU_PEMBAYARAN');
+  assert.equal(await statusReservasi(p.order_id), 'AKTIF');
+});
+
+test('stok habis pada tanggal yang beririsan ditolak, tanggal lain tetap bisa', async (t) => {
+  if (lewati(t)) return;
+  const user = await buatPengguna('stok@uji.test');
+  const alat = await buatAlat('UJI-STOK', 1);
+  await pesan(user, alat);
+  await assert.rejects(() => pesan(user, alat), { name: 'StockUnavailableError' });
+  await assert.doesNotReject(() => pesan(user, alat, 1, hariKe(20), hariKe(21)));
+});
+
+test('dua pesanan bersamaan untuk satu-satunya unit: tepat satu yang berhasil (tanpa double-booking)', async (t) => {
+  if (lewati(t)) return;
+  const a = await buatPengguna('balap-a@uji.test');
+  const b = await buatPengguna('balap-b@uji.test');
+  const alat = await buatAlat('UJI-BALAP', 1);
+  const hasil = await Promise.allSettled([pesan(a, alat), pesan(b, alat)]);
+  assert.equal(hasil.filter((h) => h.status === 'fulfilled').length, 1);
+  const gagal = hasil.find((h) => h.status === 'rejected');
+  assert.equal(gagal.reason.name, 'StockUnavailableError');
+  assert.equal((await db('StockReservation').where({ item_id: alat, status: 'AKTIF' }).sum({ n: 'kuantitas' }))[0].n, 1);
+});
+
+test('tanggal mulai di masa lalu dan keranjang kosong ditolak', async (t) => {
+  if (lewati(t)) return;
+  const user = await buatPengguna('tanggal@uji.test');
+  const alat = await buatAlat('UJI-TGL', 3);
+  await assert.rejects(() => pesan(user, alat, 1, hariKe(-2), hariKe(1)), { code: 'TANGGAL_MULAI_MASA_LALU' });
+  await assert.rejects(() => orderService.buatPesanan({ userId: user, barisKeranjang: [], tanggalMulai: hariKe(5), tanggalSelesai: hariKe(6) }), { code: 'KERANJANG_KOSONG' });
+});
+
+test('pembatalan oleh pelanggan melepas stok; orang lain tidak boleh membatalkan', async (t) => {
+  if (lewati(t)) return;
+  const pemilik = await buatPengguna('batal-a@uji.test');
+  const lain = await buatPengguna('batal-b@uji.test');
+  const alat = await buatAlat('UJI-BATAL', 1);
+  const p = await pesan(pemilik, alat);
+  await assert.rejects(() => orderService.batalkanPesanan({ orderId: p.order_id, userId: lain }), { name: 'ForbiddenError' });
+  const batal = await orderService.batalkanPesanan({ orderId: p.order_id, userId: pemilik });
+  assert.equal(batal.status, 'DIBATALKAN');
+  assert.equal(await statusReservasi(p.order_id), 'DILEPAS');
+  await assert.doesNotReject(() => pesan(lain, alat), 'unit yang dilepas harus bisa dipesan lagi');
+});
+
+test('stok dihitung per item: pesanan dua alat tidak mengacaukan sisa masing-masing', async (t) => {
+  if (lewati(t)) return;
+  const user = await buatPengguna('multi@uji.test');
+  const a = await buatAlat('UJI-MULTI-A', 2);
+  const b = await buatAlat('UJI-MULTI-B', 1);
+  await orderService.buatPesanan({
+    userId: user,
+    barisKeranjang: [{ tipe: 'ITEM', item_id: a, kuantitas: 1 }, { tipe: 'ITEM', item_id: b, kuantitas: 1 }],
+    tanggalMulai: hariKe(30), tanggalSelesai: hariKe(31),
+  });
+  await assert.doesNotReject(() => pesan(user, a, 1, hariKe(30), hariKe(31)), 'A masih punya 1 unit sisa');
+  await assert.rejects(() => pesan(user, a, 1, hariKe(30), hariKe(31)), { name: 'StockUnavailableError' });
+  await assert.rejects(() => pesan(user, b, 1, hariKe(30), hariKe(31)), { name: 'StockUnavailableError' });
+});
