@@ -170,7 +170,13 @@ export async function panggil(jalur, { metode = 'GET', body, tanpaToken = false,
   try {
     hasil = await respons.json();
   } catch {
-    throw new GalatApi('Respons server tidak dapat dibaca.', { status: respons.status });
+    // Isi bukan JSON hampir selalu berarti backend mati atau proksi gagal meneruskan (5xx tanpa badan).
+    throw new GalatApi(
+      respons.status >= 500
+        ? 'Server tidak dapat dihubungi. Coba lagi sebentar lagi; jika berulang, hubungi pengelola.'
+        : 'Respons server tidak dapat dibaca.',
+      { status: respons.status }
+    );
   }
 
   if (!respons.ok || hasil.status === 'error') {
