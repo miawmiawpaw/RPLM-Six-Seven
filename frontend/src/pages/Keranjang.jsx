@@ -20,6 +20,7 @@ export default function Keranjang() {
     setTanggalMulai,
     setTanggalSelesai,
     ubahKuantitas,
+    tambah,
     hapus,
     kosongkan,
     totalItem,
@@ -31,6 +32,28 @@ export default function Keranjang() {
   const [galat, setGalat] = useState(null);
   const [kekurangan, setKekurangan] = useState([]);
   const [memeriksa, setMemeriksa] = useState(false);
+  const [terhapus, setTerhapus] = useState(null);
+
+  // Hapus langsung, tetapi beri waktu 6 detik untuk mengurungkan.
+  useEffect(() => {
+    if (!terhapus) return undefined;
+    const timer = setTimeout(() => setTerhapus(null), 6000);
+    return () => clearTimeout(timer);
+  }, [terhapus]);
+
+  function hapusDenganUndo(b) {
+    hapus(b.tipe, b.id);
+    setTerhapus(b);
+  }
+
+  const pesanUndo = terhapus && (
+    <p className="catatan-info" role="status">
+      {terhapus.nama} dihapus dari keranjang.{" "}
+      <button type="button" className="tombol-tautan" onClick={() => { tambah(terhapus); setTerhapus(null); }}>
+        Urungkan
+      </button>
+    </p>
+  );
 
   const hari = durasiHari(tanggalMulai, tanggalSelesai);
 
@@ -96,6 +119,7 @@ export default function Keranjang() {
     return (
       <section className="halaman">
         <h1>Keranjang</h1>
+        {pesanUndo}
         <p className="pesan-kosong">Keranjang Anda masih kosong.</p>
         <Link to="/katalog" className="tombol-utama">
           Lihat katalog
@@ -107,6 +131,7 @@ export default function Keranjang() {
   return (
     <section className="halaman">
       <h1>Keranjang</h1>
+      {pesanUndo}
       <p className="catatan-kecil">{totalItem} unit dalam keranjang</p>
 
       <div className="blok-tanggal">
@@ -165,7 +190,7 @@ export default function Keranjang() {
                   <button
                     type="button"
                     className="tombol-hapus"
-                    onClick={() => hapus(b.tipe, b.id)}
+                    onClick={() => hapusDenganUndo(b)}
                     aria-label={`Hapus ${b.nama}`}
                   >
                     Hapus

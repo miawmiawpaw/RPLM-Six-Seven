@@ -332,9 +332,10 @@ export default function DetailPesanan() {
               type="button"
               className="tombol-sekunder lebar-penuh"
               disabled={sedangAksi}
-              onClick={() =>
-                jalankanAksi(() => api.pesanan.batalkan(orderId), 'Pesanan berhasil dibatalkan.')
-              }
+              onClick={() => {
+                if (!window.confirm('Batalkan pesanan ini? Alat yang sudah dipesan akan dilepas dan tindakan ini tidak dapat diurungkan.')) return;
+                jalankanAksi(() => api.pesanan.batalkan(orderId), 'Pesanan berhasil dibatalkan.');
+              }}
             >
               Batalkan pesanan
             </button>

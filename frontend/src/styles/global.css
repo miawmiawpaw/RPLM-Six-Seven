@@ -1818,3 +1818,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .meadow-footer-main { position: relative; }
 .meadow-footer-main::before { content: ''; position: absolute; z-index: -1; top: -24px; bottom: -120px; left: 50%; width: 100vw; margin-left: -50vw; background: linear-gradient(180deg, rgba(37,48,25,0), rgba(37,48,25,.1) 24px); pointer-events: none; }
 .meadow-footer-links a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ─── Tombol bergaya tautan (mis. "Urungkan") ────────────────────────────────── */
+.tombol-tautan { padding: 0; border: 0; background: none; color: #415325; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.tombol-tautan:hover { color: #2f3d1b; }
+.tombol-tautan:focus-visible { outline: 2px solid #415325; outline-offset: 2px; }
