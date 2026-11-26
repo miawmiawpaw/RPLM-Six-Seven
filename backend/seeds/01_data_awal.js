@@ -16,6 +16,19 @@ const KATA_SANDI_PETUGAS_DEFAULT = 'Petugas#12345';
  * @param {import('knex').Knex} knex
  */
 exports.seed = async function seed(knex) {
+  // Seed menghapus SEMUA data lebih dulu. Tolak bila database sudah berisi,
+  // kecuali pemakai sengaja mengizinkannya, dan tolak mutlak di production.
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Seed dilarang di production karena menghapus seluruh data.');
+  }
+  const [{ n }] = await knex('User').count({ n: '*' });
+  if (Number(n) > 0 && process.env.ALLOW_SEED_RESET !== 'true') {
+    throw new Error(
+      'Database sudah berisi data; seed akan menghapus semuanya. ' +
+        'Jalankan ulang dengan ALLOW_SEED_RESET=true bila memang itu yang dimaksud.'
+    );
+  }
+
   // Urutan hapus menghormati foreign key.
   await knex('AuditLog').del();
   await knex('NotificationLog').del();
