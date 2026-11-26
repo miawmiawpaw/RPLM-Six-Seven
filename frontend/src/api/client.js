@@ -23,10 +23,14 @@ import { tanganiMock, eksporCsvMock } from './mock/routerMock.js';
  * Matikan dengan menambahkan baris berikut pada `.env.local`:
  *   VITE_USE_MOCK=false
  *
- * Nilai selain 'false' (termasuk tidak diset) berarti mock menyala, karena
- * tujuan fitur ini adalah agar frontend selalu bisa dijalankan sendiri.
+ * Saat pengembangan, nilai selain 'false' (termasuk tidak diset) berarti mock menyala,
+ * karena tujuan fitur ini adalah agar frontend selalu bisa dijalankan sendiri.
+ * Pada build production mock HANYA menyala bila VITE_USE_MOCK=true secara eksplisit,
+ * agar situs yang di-deploy tidak diam-diam menampilkan data palsu.
  */
-const PAKAI_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
+const PAKAI_MOCK = import.meta.env.PROD
+  ? import.meta.env.VITE_USE_MOCK === 'true'
+  : import.meta.env.VITE_USE_MOCK !== 'false';
 
 const KUNCI_TOKEN = 'rac_token_akses';
 const KUNCI_REFRESH = 'rac_token_refresh';
