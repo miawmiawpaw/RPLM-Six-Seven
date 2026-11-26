@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import { rupiah } from '../utils/format';
+import { rupiah, hariIniIso } from '../utils/format';
 import { fotoPaket } from '../utils/fotoProduk';
 import calendarIcon from '../../assets/Rental Camping/Calendar Glyph.svg';
 import chevronIcon from '../../assets/Rental Camping/ChevronDown Glyph.svg';
@@ -45,6 +45,7 @@ const LANGKAH = [
 ];
 
 export default function Beranda() {
+  const navigate = useNavigate();
   const [kategori, setKategori] = useState([]);
   const [paket, setPaket] = useState([]);
   const [memuat, setMemuat] = useState(true);
@@ -55,9 +56,22 @@ export default function Beranda() {
       .then(([kategoriHasil, paketHasil]) => { setKategori(kategoriHasil.data || []); setPaket(paketHasil.data || []); })
       .catch((err) => setGalat(err.message)).finally(() => setMemuat(false));
   }, []);
+  /** Kirim pilihan ke katalog; tanggal dan kategori ikut di URL (katalog membacanya dari sana). */
+  function cariKetersediaan(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const { mulai, selesai } = form.elements;
+    selesai.setCustomValidity(mulai.value && selesai.value && selesai.value < mulai.value ? 'Tanggal selesai tidak boleh sebelum tanggal mulai.' : '');
+    if (!form.reportValidity()) return;
+    const data = new FormData(form);
+    const params = new URLSearchParams();
+    ["mulai", "selesai", "kategori"].forEach((k) => data.get(k) && params.set(k, data.get(k)));
+    navigate(`/katalog${params.toString() ? `?${params}` : ""}`);
+  }
+
   return <div className="landing">
     <section className="landing-hero"><div className="landing-hero-copy"><p className="landing-eyebrow landing-eyebrow-pill">OUTDOOR RENTAL <span>•</span> YOGYAKARTA</p><h1>Sewa perlengkapan camping untuk <em>petualanganmu.</em></h1><p className="landing-lead">Temukan perlengkapan camping dan pendakian berkualitas. Pilih alat, tentukan tanggal, lalu nikmati perjalanan tanpa repot menyiapkan semuanya sendiri.</p><div className="landing-actions"><Link to="/katalog" className="landing-button">Jelajahi Perlengkapan</Link><a href="#cara-sewa" className="landing-button landing-button-light">Cara Sewa</a></div><div className="landing-trust"><span>● Perlengkapan terawat</span><span>● Proses sewa mudah</span></div></div><div className="landing-art landing-art-photo"><img className="landing-hero-photo" fetchPriority="high" decoding="async" src={heroPhoto} alt="Perlengkapan camping di alam terbuka" /><div className="landing-note"><b>✓</b><span>Siap berpetualang<small>Peralatan dicek sebelum disewa</small></span></div></div></section>
-    <form className="landing-search" onSubmit={(event) => event.preventDefault()}><label>Mulai Sewa<span><img src={calendarIcon} alt="" /><input type="date" aria-label="Pilih tanggal mulai" /></span></label><label>Selesai Sewa<span><img src={calendarIcon} alt="" /><input type="date" aria-label="Pilih tanggal selesai" /></span></label><label>Kategori Perlengkapan<span><img src={chevronIcon} alt="" /><select aria-label="Kategori perlengkapan"><option value="">Semua kategori</option>{kategori.map((item) => <option key={item.category_id} value={item.category_id}>{item.nama}</option>)}</select></span></label><button className="landing-button" type="submit">Cari Ketersediaan</button></form>
+    <form className="landing-search" onSubmit={cariKetersediaan}><label>Mulai Sewa<span><img src={calendarIcon} alt="" /><input type="date" name="mulai" min={hariIniIso()} aria-label="Pilih tanggal mulai" /></span></label><label>Selesai Sewa<span><img src={calendarIcon} alt="" /><input type="date" name="selesai" min={hariIniIso()} onChange={(e) => e.target.setCustomValidity('')} aria-label="Pilih tanggal selesai" /></span></label><label>Kategori Perlengkapan<span><img src={chevronIcon} alt="" /><select name="kategori" aria-label="Kategori perlengkapan"><option value="">Semua kategori</option>{kategori.map((item) => <option key={item.category_id} value={item.category_id}>{item.nama}</option>)}</select></span></label><button className="landing-button" type="submit">Cari Ketersediaan</button></form>
     <section className="landing-section landing-benefits"><SectionHeading label="KENAPA KAMI" title="Camping lebih tenang, persiapan lebih ringan." text="Semua kebutuhan petualanganmu, kami siapkan dengan standar yang jelas." /><div className="landing-grid landing-grid-four">{KEUNGGULAN.map(([title, text, icon]) => <article className="landing-card" key={title}><span className="landing-icon"><img src={icon} alt="" /></span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
     <section className="landing-section landing-categories"><SectionHeading label="PILIH SESUAI KEBUTUHAN" title="Jelajahi kategori perlengkapan" link="Lihat semua kategori →" /><div className="landing-grid landing-grid-four">{KATEGORI.map(([title, filter, icon]) => <Link className="landing-category" to={`/katalog?kategori=${encodeURIComponent(filter)}`} key={title}><span className="landing-category-icon"><img src={icon} alt="" /></span><span><b>{title}</b><small>{kategori.find((item) => item.nama === filter)?.jumlah_tersedia || '—'} unit tersedia</small><strong>Lihat kategori →</strong></span></Link>)}</div></section>
     <section className="landing-section landing-packages" id="paket"><SectionHeading label="PAKET PILIHAN" title="Paket camping untuk setiap cerita." text="Pilih paket praktis atau susun kebutuhanmu sendiri." link="Lihat semua paket →" />{galat && <p className="pesan-galat" role="alert">Gagal memuat paket: {galat}</p>}{memuat && <p role="status">Memuat paket…</p>}<div className="landing-grid landing-grid-three">{paket.slice(0, 3).map((item) => <article className="landing-product" key={item.bundle_id}><div className="landing-product-art"><img src={fotoPaket(item.nama)} alt="" loading="lazy" /></div><div className="landing-product-body"><div className="landing-product-meta"><small>PAKET CAMPING</small><span className="landing-stock"><img src={availableDot} alt="" /> Tersedia</span></div><h3>{item.nama}</h3><p>{item.deskripsi}</p>{item.komponen?.length > 0 && <ul className="landing-product-chip">{item.komponen.map((k) => <li key={k.item_id}>{k.kuantitas}× {k.nama}</li>)}</ul>}</div><div className="landing-product-foot"><strong>{rupiah(item.harga_bundle)} <small>/ hari</small></strong><Link to="/katalog" className="landing-button">Sewa paket</Link></div></article>)}</div></section>
