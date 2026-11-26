@@ -82,7 +82,7 @@ export default function TataLetak() {
     <div className="tata-letak">
       <a href="#konten" className="lompat">Lewati ke konten</a>
       <header className="header meadow-header">
-        <Link to="/" className="merek"><img src={logo} alt="" /><span><strong>RENTAL CAMPING</strong><small>OUTDOOR RENTAL</small></span></Link>
+        <Link to="/" className="merek"><img src={logo} alt="" width="40" height="40" /><span translate="no"><strong>RENTAL CAMPING</strong><small>OUTDOOR RENTAL</small></span></Link>
         <nav id="navigasi-utama" className={terbuka ? 'navigasi terbuka' : 'navigasi'} aria-label="Navigasi utama">
           {menu.map((m) => m.ke.includes('#')
             ? <Link key={m.ke} to={m.ke} className="tautan">{m.label}</Link>
@@ -90,9 +90,10 @@ export default function TataLetak() {
           <div className="nav-akun">{akun}</div>
         </nav>
         <div className="aksi-header">
+          <span className="sr-only" role="status" aria-live="polite">{totalItem > 0 ? `Keranjang berisi ${totalItem} item.` : ''}</span>
           {(!masukAkun || peran === PERAN.PELANGGAN) && (
             <Link to="/keranjang" className="tautan-keranjang" aria-label={totalItem > 0 ? `Keranjang, ${totalItem} item` : 'Keranjang'}>
-              <img src={cartIcon} alt="" /><span className="teks-keranjang">Keranjang</span>{totalItem > 0 && <span className="lencana">{totalItem}</span>}
+              <img src={cartIcon} alt="" width="16" height="16" /><span className="teks-keranjang">Keranjang</span>{totalItem > 0 && <span className="lencana">{totalItem}</span>}
             </Link>
           )}
           <div className="aksi-akun">{akun}</div>

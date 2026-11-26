@@ -11,8 +11,8 @@ export default function KerangkaAuth({ judul, aksen, deskripsi, children }) {
     <div className="auth">
       <aside className="auth-panel">
         <Link to="/" className="auth-merek">
-          <img src={logo} alt="" />
-          <span>
+          <img src={logo} alt="" width="40" height="40" />
+          <span translate="no">
             <strong>RENTAL CAMPING</strong>
             <small>OUTDOOR EQUIPMENT RENTAL</small>
           </span>
