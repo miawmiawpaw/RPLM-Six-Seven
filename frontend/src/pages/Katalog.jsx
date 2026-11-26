@@ -7,6 +7,13 @@ import { fotoPaket } from '../utils/fotoProduk';
 import { useAuth, PERAN } from '../context/AuthContext';
 import { useKeranjang } from '../context/CartContext';
 
+/** Nomor halaman ringkas: 1 … sekarang-1 sekarang sekarang+1 … terakhir. */
+function nomorHalaman(sekarang, total) {
+  const set = new Set([1, total, sekarang - 1, sekarang, sekarang + 1].filter((n) => n >= 1 && n <= total));
+  const urut = [...set].sort((a, b) => a - b);
+  return urut.flatMap((n, i) => (i > 0 && n - urut[i - 1] > 1 ? ['…', n] : [n]));
+}
+
 const TAB = [
   ['semua', 'Semua Produk'],
   ['item', 'Item Satuan'],
@@ -24,6 +31,7 @@ export default function Katalog() {
 
   const kataKunci = parameter.get('q') || '';
   const kategori = parameter.get('kategori') || '';
+  const tab = TAB.some(([k]) => k === parameter.get('tab')) ? parameter.get('tab') : 'semua';
   const mulai = parameter.get('mulai') || '';
   const selesai = parameter.get('selesai') || '';
 
@@ -34,7 +42,6 @@ export default function Katalog() {
   const [meta, setMeta] = useState({ halaman: 1, total: 0, batas: 12 });
   const [memuat, setMemuat] = useState(true);
   const [galat, setGalat] = useState(null);
-  const [tab, setTab] = useState('semua');
 
   // Keranjang hanya untuk tamu dan pelanggan; tanggal sewa dipilih di halaman keranjang.
   const { masukAkun, peran } = useAuth();
@@ -57,7 +64,7 @@ export default function Katalog() {
     const kunci = `${entri.tipe}:${entri.id}`;
     return (
       <button type="button" className="landing-button kat-tombol" disabled={!aktif} onClick={() => tambahKeKeranjang(entri)}>
-        {baruDitambah === kunci ? 'Ditambahkan ✓' : '+ Keranjang'}
+        {baruDitambah === kunci ? <>Ditambahkan <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2.5 7.5 5.5 10.5 11.5 3.5" /></svg></> : '+ Keranjang'}
       </button>
     );
   }
@@ -123,6 +130,9 @@ export default function Katalog() {
 
   return (
     <section className="kat">
+      <span className="sr-only" role="status" aria-live="polite">
+        {baruDitambah ? 'Ditambahkan ke keranjang.' : ''}
+      </span>
       <header className="kat-kepala">
         <p className="landing-eyebrow">KATALOG PERLENGKAPAN</p>
         <h1>Katalog Alat</h1>
@@ -155,15 +165,14 @@ export default function Katalog() {
         />
       </div>
 
-      <div className="kat-tab" role="tablist" aria-label="Jenis produk">
+      <div className="kat-tab" role="group" aria-label="Jenis produk">
         {TAB.map(([kunci, label]) => (
           <button
             key={kunci}
             type="button"
-            role="tab"
-            aria-selected={tab === kunci}
+            aria-pressed={tab === kunci}
             className={tab === kunci ? 'aktif' : ''}
-            onClick={() => setTab(kunci)}
+            onClick={() => ubahParameter({ tab: kunci === 'semua' ? '' : kunci })}
           >
             {label}
           </button>
@@ -312,7 +321,9 @@ export default function Katalog() {
                         >
                           Sebelumnya
                         </button>
-                        {Array.from({ length: jumlahHalaman }, (_, n) => n + 1).map((n) => (
+                        {nomorHalaman(halamanSekarang, jumlahHalaman).map((n, i) => n === '…' ? (
+                          <span key={`titik-${i}`} aria-hidden="true">…</span>
+                        ) : (
                           <button
                             key={n}
                             type="button"

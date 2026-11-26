@@ -1823,3 +1823,5 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .tombol-tautan { padding: 0; border: 0; background: none; color: #415325; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
 .tombol-tautan:hover { color: #2f3d1b; }
 .tombol-tautan:focus-visible { outline: 2px solid #415325; outline-offset: 2px; }
+.kat-tab button[aria-pressed='true'] { background: #fff; color: #1d2618; box-shadow: 0 1px 3px rgba(26,36,20,.12); }
+.kat-halaman > div > span { display: inline-flex; min-width: 24px; justify-content: center; color: #515b47; }
