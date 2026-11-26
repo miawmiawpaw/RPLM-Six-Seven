@@ -1,10 +1,20 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const { UnauthorizedError, ForbiddenError } = require('../utils/errors');
+const { JENIS_TOKEN } = require('../constants');
+
+/** Tolak token yang bukan token akses (refresh, verifikasi email, reset sandi). */
+function bacaTokenAkses(token) {
+  const payload = jwt.verify(token, config.jwt.secret);
+  if (payload.jenis !== JENIS_TOKEN.AKSES) {
+    throw new jwt.JsonWebTokenError('jenis token bukan akses');
+  }
+  return { id: payload.sub, email: payload.email, peran: payload.peran };
+}
 
 /**
  * Verifikasi JWT dari header Authorization (SRS §3.4).
- * Menempelkan { id, email, peran } ke req.user.
+ * Menempelkan { id, email, peran } ke req.user. Hanya token akses yang diterima.
  */
 function authenticate(req, _res, next) {
   const header = req.headers.authorization || '';
@@ -15,8 +25,7 @@ function authenticate(req, _res, next) {
   }
 
   try {
-    const payload = jwt.verify(token, config.jwt.secret);
-    req.user = { id: payload.sub, email: payload.email, peran: payload.peran };
+    req.user = bacaTokenAkses(token);
     return next();
   } catch (err) {
     const pesan =
@@ -36,8 +45,7 @@ function authenticateOptional(req, _res, next) {
   const [skema, token] = header.split(' ');
   if (skema === 'Bearer' && token) {
     try {
-      const payload = jwt.verify(token, config.jwt.secret);
-      req.user = { id: payload.sub, email: payload.email, peran: payload.peran };
+      req.user = bacaTokenAkses(token);
     } catch {
       // Token tidak valid pada endpoint publik — perlakukan sebagai tamu.
     }

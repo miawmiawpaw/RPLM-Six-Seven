@@ -111,7 +111,16 @@ const STATUS_PEROBAYAAN = Object.freeze({
   REFUND: 'REFUND',
 });
 
+/** Jenis token JWT. Setiap token membawa klaim `jenis`; tiap pemakai wajib memeriksanya. */
+const JENIS_TOKEN = Object.freeze({
+  AKSES: 'akses',
+  REFRESH: 'refresh',
+  VERIFIKASI_EMAIL: 'verifikasi_email',
+  RESET_KATA_SANDI: 'reset_kata_sandi',
+});
+
 module.exports = {
+  JENIS_TOKEN,
   STATUS_PESANAN,
   TRANSISI_PESANAN_SAH,
   STATUS_PESANAN_AKTIF,

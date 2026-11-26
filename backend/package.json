@@ -15,7 +15,7 @@
     "migrate:rollback": "knex migrate:rollback --knexfile knexfile.js",
     "seed": "knex seed:run --knexfile knexfile.js",
     "db:reset": "npm run migrate:rollback -- --all && npm run migrate && npm run seed",
-    "test": "node --test tests/"
+    "test": "node --test"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

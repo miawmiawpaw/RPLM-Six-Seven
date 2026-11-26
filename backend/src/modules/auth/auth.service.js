@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../../config/database');
 const config = require('../../config');
-const { PERAN } = require('../../constants');
+const { PERAN, JENIS_TOKEN } = require('../../constants');
 const {
   ConflictError,
   UnauthorizedError,
@@ -19,13 +19,6 @@ const { kirimEmail } = require('../../utils/mailer');
  * Aturan lapisan (ADR-01): berkas ini TIDAK menyentuh req/res Express.
  * Seluruh logika bisnis dan akses data ada di sini.
  */
-
-const JENIS_TOKEN = Object.freeze({
-  AKSES: 'akses',
-  REFRESH: 'refresh',
-  VERIFIKASI_EMAIL: 'verifikasi_email',
-  RESET_KATA_SANDI: 'reset_kata_sandi',
-});
 
 /** Batas percobaan login gagal sebelum akun dikunci sementara — REQ-4.1.5. */
 const BATAS_LOGIN_GAGAL = 5;
