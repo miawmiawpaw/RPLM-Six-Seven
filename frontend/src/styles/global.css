@@ -1781,3 +1781,15 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 /* ─── Foto paket di landing ──────────────────────────────────────────────────── */
 .landing-product-art { position: relative; }
 .landing-product-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 90%; }
+
+/* ─── Tombol kartu katalog ───────────────────────────────────────────────────── */
+.kat-kartu { height: 100%; }
+.kat-kartu > .kat-tombol, .kat-aksi-baris { margin-top: auto; }
+.kat-kartu > .kat-harga + .kat-tombol, .kat-kartu > .landing-stock + .kat-tombol, .kat-kartu > .status-habis + .kat-tombol { margin-top: 8px; }
+.kat-tombol { width: 100%; min-height: 44px; cursor: pointer; font: 600 14px/20px Inter, sans-serif; transition: background .15s, opacity .15s; }
+.kat-tombol:hover:not(:disabled) { background: #2f3d1b; }
+.kat-tombol:disabled { background: #b9c0ae; cursor: not-allowed; }
+.kat-aksi-baris { display: grid; grid-template-columns: auto 1fr; gap: 8px; padding-top: 8px; }
+.kat-tombol-garis { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 0 18px; border: 1px solid #556a33; border-radius: 999px; color: #415325; font: 600 14px/20px Inter, sans-serif; text-decoration: none; transition: background .15s; }
+.kat-tombol-garis:hover { background: #eef1e8; }
+.kat-tombol:focus-visible, .kat-tombol-garis:focus-visible { outline: 2px solid #415325; outline-offset: 2px; }

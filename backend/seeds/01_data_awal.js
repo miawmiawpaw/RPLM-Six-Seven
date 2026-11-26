@@ -115,6 +115,12 @@ exports.seed = async function seed(knex) {
     harga_bundle: 240000,
   });
 
+  const [bundleSolo] = await knex('Bundle').insert({
+    nama: 'Paket Ultralight Solo',
+    deskripsi: 'Ringan untuk pendakian tektok atau solo backpacking: 1 tenda, 1 carrier, 1 kompor.',
+    harga_bundle: 95000,
+  });
+
   await knex('BundleItem').insert([
     { bundle_id: bundleDua, item_id: idAlat['TND-002'], kuantitas: 1 },
     { bundle_id: bundleDua, item_id: idAlat['NES-001'], kuantitas: 1 },
@@ -122,6 +128,10 @@ exports.seed = async function seed(knex) {
     { bundle_id: bundleDua, item_id: idAlat['LMP-001'], kuantitas: 1 },
 
     { bundle_id: bundleEmpat, item_id: idAlat['TND-002'], kuantitas: 2 },
+    { bundle_id: bundleSolo, item_id: idAlat['TND-002'], kuantitas: 1 },
+    { bundle_id: bundleSolo, item_id: idAlat['TAS-001'], kuantitas: 1 },
+    { bundle_id: bundleSolo, item_id: idAlat['MSK-001'], kuantitas: 1 },
+
     { bundle_id: bundleEmpat, item_id: idAlat['NES-001'], kuantitas: 2 },
     { bundle_id: bundleEmpat, item_id: idAlat['MSK-001'], kuantitas: 2 },
     { bundle_id: bundleEmpat, item_id: idAlat['LMP-001'], kuantitas: 2 },

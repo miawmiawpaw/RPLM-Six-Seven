@@ -4,6 +4,8 @@ import { api } from '../api/client';
 import { rupiah, hariIniIso } from '../utils/format';
 import PemilihTanggal from '../components/PemilihTanggal';
 import { fotoPaket } from '../utils/fotoProduk';
+import { useAuth, PERAN } from '../context/AuthContext';
+import { useKeranjang } from '../context/CartContext';
 
 const TAB = [
   ['semua', 'Semua Produk'],
@@ -33,6 +35,32 @@ export default function Katalog() {
   const [memuat, setMemuat] = useState(true);
   const [galat, setGalat] = useState(null);
   const [tab, setTab] = useState('semua');
+
+  // Keranjang hanya untuk tamu dan pelanggan; tanggal sewa dipilih di halaman keranjang.
+  const { masukAkun, peran } = useAuth();
+  const { tambah } = useKeranjang();
+  const bolehPesan = !masukAkun || peran === PERAN.PELANGGAN;
+  const [baruDitambah, setBaruDitambah] = useState('');
+
+  useEffect(() => {
+    if (!baruDitambah) return undefined;
+    const timer = setTimeout(() => setBaruDitambah(''), 1500);
+    return () => clearTimeout(timer);
+  }, [baruDitambah]);
+
+  function tambahKeKeranjang(entri) {
+    tambah({ ...entri, kuantitas: 1 });
+    setBaruDitambah(`${entri.tipe}:${entri.id}`);
+  }
+
+  function tombolKeranjang(entri, aktif) {
+    const kunci = `${entri.tipe}:${entri.id}`;
+    return (
+      <button type="button" className="landing-button kat-tombol" disabled={!aktif} onClick={() => tambahKeKeranjang(entri)}>
+        {baruDitambah === kunci ? 'Ditambahkan ✓' : '+ Keranjang'}
+      </button>
+    );
+  }
 
   // Daftar kategori hanya perlu diambil sekali.
   useEffect(() => {
@@ -215,6 +243,7 @@ export default function Katalog() {
                             {paket.tersedia > 0 ? `${paket.tersedia} paket tersedia` : 'Tidak tersedia'}
                           </span>
                         )}
+                        {bolehPesan && tombolKeranjang({ tipe: 'BUNDLE', id: paket.bundle_id, nama: paket.nama, harga: paket.harga_bundle }, paket.tersedia == null || paket.tersedia > 0)}
                       </li>
                     ))}
                   </ul>
@@ -255,9 +284,12 @@ export default function Katalog() {
                               <span>/ hari</span>
                             </div>
                             {dapatDisewa ? (
-                              <Link to={`/katalog/${alat.item_id}${queryDetail}`} className="landing-button kat-aksi">
-                                Lihat detail
-                              </Link>
+                              <div className="kat-aksi-baris">
+                                <Link to={`/katalog/${alat.item_id}${queryDetail}`} className="kat-tombol-garis">
+                                  Detail
+                                </Link>
+                                {bolehPesan && tombolKeranjang({ tipe: 'ITEM', id: alat.item_id, nama: alat.nama, harga: alat.tarif_harian }, alat.tersedia == null || alat.tersedia > 0)}
+                              </div>
                             ) : (
                               <p className="status-habis">Tidak dapat disewa ({alat.status_kondisi})</p>
                             )}
