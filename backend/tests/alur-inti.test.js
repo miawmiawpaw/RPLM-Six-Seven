@@ -174,3 +174,81 @@ test('stok dihitung per item: pesanan dua alat tidak mengacaukan sisa masing-mas
   await assert.rejects(() => pesan(user, a, 1, hariKe(30), hariKe(31)), { name: 'StockUnavailableError' });
   await assert.rejects(() => pesan(user, b, 1, hariKe(30), hariKe(31)), { name: 'StockUnavailableError' });
 });
+
+// ─── Webhook pembayaran dan pembatalan otomatis ───────────────────────────────
+
+const crypto = require('crypto');
+const config = require('../src/config');
+const paymentService = require('../src/modules/payment/payment.service');
+const { batalkanPesananKedaluwarsa } = require('../src/jobs/scheduler');
+
+const notifikasi = (kode, transactionId, status, jumlah) => {
+  const statusCode = '200';
+  const signature_key = crypto.createHash('sha512').update(`${kode}${statusCode}${jumlah}${config.midtrans.serverKey}`).digest('hex');
+  return Buffer.from(JSON.stringify({
+    order_id: kode, status_code: statusCode, gross_amount: jumlah, signature_key,
+    transaction_status: status, transaction_id: transactionId, payment_type: 'qris',
+  }));
+};
+const kirimNotifikasi = (p, tid, status) => paymentService.tanganiNotifikasi({ rawBody: notifikasi(p.kode_pesanan, tid, status, `${p.total_akhir}.00`) });
+const statusPesanan = async (orderId) => (await db('Order').where({ order_id: orderId }).first()).status;
+
+test('webhook: pending lalu settlement (transaction_id sama) membuat pesanan DIBAYAR', async (t) => {
+  if (lewati(t)) return;
+  const user = await buatPengguna('wh-a@uji.test');
+  const p = await pesan(user, await buatAlat('UJI-WH-A', 1));
+  assert.equal((await kirimNotifikasi(p, 'tid-a', 'pending')).status, 'diproses');
+  assert.equal(await statusPesanan(p.order_id), 'MENUNGGU_PEMBAYARAN');
+  assert.equal((await kirimNotifikasi(p, 'tid-a', 'settlement')).status, 'diproses');
+  assert.equal(await statusPesanan(p.order_id), 'DIBAYAR');
+  assert.equal((await kirimNotifikasi(p, 'tid-a', 'settlement')).status, 'diabaikan');
+  assert.equal((await db('Payment').where({ order_id: p.order_id }).count({ n: '*' }))[0].n, 2);
+});
+
+test('webhook: dua notifikasi identik bersamaan hanya diproses sekali dan tidak error', async (t) => {
+  if (lewati(t)) return;
+  const user = await buatPengguna('wh-b@uji.test');
+  const p = await pesan(user, await buatAlat('UJI-WH-B', 1));
+  const hasil = await Promise.allSettled([kirimNotifikasi(p, 'tid-b', 'settlement'), kirimNotifikasi(p, 'tid-b', 'settlement')]);
+  assert.ok(hasil.every((h) => h.status === 'fulfilled'), hasil.map((h) => h.reason?.message).join());
+  assert.equal(hasil.filter((h) => h.value.status === 'diproses').length, 1);
+  assert.equal((await db('Payment').where({ order_id: p.order_id }).count({ n: '*' }))[0].n, 1);
+});
+
+test('webhook: signature salah ditolak dan tidak mengubah apa pun', async (t) => {
+  if (lewati(t)) return;
+  const user = await buatPengguna('wh-c@uji.test');
+  const p = await pesan(user, await buatAlat('UJI-WH-C', 1));
+  const palsu = JSON.parse(notifikasi(p.kode_pesanan, 'tid-c', 'settlement', `${p.total_akhir}.00`));
+  palsu.signature_key = 'palsu';
+  await assert.rejects(() => paymentService.tanganiNotifikasi({ rawBody: Buffer.from(JSON.stringify(palsu)) }), { name: 'ForbiddenError' });
+  assert.equal(await statusPesanan(p.order_id), 'MENUNGGU_PEMBAYARAN');
+  assert.equal((await db('Payment').where({ order_id: p.order_id }).count({ n: '*' }))[0].n, 0);
+});
+
+test('pesanan lewat batas bayar dibatalkan otomatis dan stoknya bisa dipesan lagi', async (t) => {
+  if (lewati(t)) return;
+  const user = await buatPengguna('exp-a@uji.test');
+  const lain = await buatPengguna('exp-b@uji.test');
+  const alat = await buatAlat('UJI-EXP', 1);
+  const p = await pesan(user, alat);
+  await assert.rejects(() => pesan(lain, alat), { name: 'StockUnavailableError' });
+
+  await db('Order').where({ order_id: p.order_id }).update({ batas_pembayaran: new Date(Date.now() - 60000) });
+  assert.ok((await batalkanPesananKedaluwarsa()) >= 1);
+
+  assert.equal(await statusPesanan(p.order_id), 'GAGAL_KEDALUWARSA');
+  assert.equal(await statusReservasi(p.order_id), 'DILEPAS');
+  await assert.doesNotReject(() => pesan(lain, alat));
+});
+
+test('pesanan yang sudah dibayar tidak ikut dibatalkan walau lewat batas bayar', async (t) => {
+  if (lewati(t)) return;
+  const user = await buatPengguna('exp-c@uji.test');
+  const p = await pesan(user, await buatAlat('UJI-EXP-LUNAS', 1));
+  await kirimNotifikasi(p, 'tid-lunas', 'settlement');
+  await db('Order').where({ order_id: p.order_id }).update({ batas_pembayaran: new Date(Date.now() - 60000) });
+  await batalkanPesananKedaluwarsa();
+  assert.equal(await statusPesanan(p.order_id), 'DIBAYAR');
+  assert.equal(await statusReservasi(p.order_id), 'AKTIF');
+});
