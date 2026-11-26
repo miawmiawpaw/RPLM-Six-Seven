@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, PERAN } from '../context/AuthContext';
 import { useKeranjang } from '../context/CartContext';
@@ -21,7 +21,8 @@ const PUBLIK = [
 ];
 
 const MENU = {
-  [PERAN.PELANGGAN]: [...PUBLIK, { ke: '/pesanan-saya', label: 'Pesanan Saya' }],
+  // Pelanggan yang sudah masuk tidak butuh anchor pemasaran: paket ada di tab Katalog, bantuan di footer.
+  [PERAN.PELANGGAN]: [PUBLIK[0], { ke: '/pesanan-saya', label: 'Pesanan Saya' }],
   [PERAN.PETUGAS]: [{ ke: '/petugas/tugas', label: 'Tugas' }],
   [PERAN.ADMIN]: [
     { ke: '/admin/dasbor', label: 'Dasbor' },
@@ -31,6 +32,60 @@ const MENU = {
     { ke: '/admin/laporan', label: 'Laporan' },
   ],
 };
+
+const LABEL_PERAN = { [PERAN.PELANGGAN]: 'Pelanggan', [PERAN.PETUGAS]: 'Petugas', [PERAN.ADMIN]: 'Admin' };
+
+/** Menu akun: avatar membuka Profil dan Keluar. Esc atau klik di luar menutupnya. */
+function MenuAkun({ pengguna, peran, onKeluar }) {
+  const [buka, setBuka] = useState(false);
+  const wadah = useRef(null);
+  const tombol = useRef(null);
+  const { pathname } = useLocation();
+
+  useEffect(() => setBuka(false), [pathname]);
+
+  useEffect(() => {
+    if (!buka) return undefined;
+    const klikLuar = (e) => {
+      if (!wadah.current?.contains(e.target)) setBuka(false);
+    };
+    const tekan = (e) => {
+      if (e.key !== 'Escape') return;
+      setBuka(false);
+      tombol.current?.focus();
+    };
+    document.addEventListener('pointerdown', klikLuar);
+    document.addEventListener('keydown', tekan);
+    return () => {
+      document.removeEventListener('pointerdown', klikLuar);
+      document.removeEventListener('keydown', tekan);
+    };
+  }, [buka]);
+
+  const inisial = (pengguna?.nama || '?').trim().charAt(0).toUpperCase();
+
+  return (
+    <div className="akun-menu" ref={wadah}>
+      <button ref={tombol} type="button" className="akun-tombol" aria-expanded={buka} aria-controls="menu-akun" onClick={() => setBuka((v) => !v)}>
+        <span className="avatar" aria-hidden="true">{inisial}</span>
+        <span className="sr-only">Menu akun {pengguna?.nama}</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M2.5 4.5 6 8l3.5-3.5" />
+        </svg>
+      </button>
+      {buka && (
+        <div id="menu-akun" className="akun-panel">
+          <div className="akun-info">
+            <strong>{pengguna?.nama}</strong>
+            <small>{LABEL_PERAN[peran]}</small>
+          </div>
+          <Link to="/profil">Profil</Link>
+          <button type="button" onClick={onKeluar}>Keluar</button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function TataLetak() {
   const { pengguna, masukAkun, peran, keluar } = useAuth();
@@ -96,10 +151,12 @@ export default function TataLetak() {
           <span className="sr-only" role="status" aria-live="polite">{totalItem > 0 ? `Keranjang berisi ${totalItem} item.` : ''}</span>
           {(!masukAkun || peran === PERAN.PELANGGAN) && (
             <Link to="/keranjang" className="tautan-keranjang" aria-label={totalItem > 0 ? `Keranjang, ${totalItem} item` : 'Keranjang'}>
-              <img src={cartIcon} alt="" width="16" height="16" /><span className="teks-keranjang">Keranjang</span>{totalItem > 0 && <span className="lencana">{totalItem}</span>}
+              <img src={cartIcon} alt="" width="16" height="16" />{totalItem > 0 && <span className="lencana">{totalItem}</span>}
             </Link>
           )}
-          <div className="aksi-akun">{akun}</div>
+          <div className="aksi-akun">
+            {masukAkun ? <MenuAkun pengguna={pengguna} peran={peran} onKeluar={tanganiKeluar} /> : <Link to="/masuk" className="tombol-kecil">Masuk</Link>}
+          </div>
           <button type="button" className="tombol-menu" aria-expanded={terbuka} aria-controls="navigasi-utama" aria-label={terbuka ? 'Tutup menu' : 'Buka menu'} onClick={() => setTerbuka((v) => !v)}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               {terbuka ? <path d="M5 5l10 10M15 5L5 15" /> : <path d="M3 6h14M3 10h14M3 14h14" />}

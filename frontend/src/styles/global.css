@@ -1759,7 +1759,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .tombol-menu { align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1px solid #556a33; border-radius: 999px; background: transparent; color: #415325; cursor: pointer; }
 .aksi-akun { display: flex; align-items: center; gap: 12px; }
 
-@media (max-width: 1280px) {
+@media (max-width: 1024px) {
   .meadow-header { flex-wrap: wrap; padding: 12px 24px; }
   .tombol-menu { display: inline-flex; }
   .meadow-header .aksi-header { margin-left: auto; }
@@ -1932,7 +1932,32 @@ h1, h2, h3 { text-wrap: balance; }
 .meadow-header .nama-pengguna { display: inline-flex; align-items: center; gap: 8px; max-width: 200px; }
 .meadow-header .nama-pengguna > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .avatar { display: inline-grid; flex: none; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #e6ebdc; color: #2f3d1b; font: 600 14px/1 'Plus Jakarta Sans', sans-serif; }
-@media (max-width: 1280px) {
+@media (max-width: 1024px) {
   .meadow-header .navigasi .tautan { border-radius: 12px; padding: 0 12px; }
   .meadow-header .nama-pengguna { max-width: none; }
 }
+
+/* ─── Navbar ringkas: keranjang ikon, menu akun avatar ───────────────────────── */
+.meadow-header .aksi-header { gap: 8px; }
+.meadow-header .tautan-keranjang { width: 44px; min-height: 44px; padding: 0; justify-content: center; border-color: #dfe3d6; background: #fff; }
+.meadow-header .tautan-keranjang:hover { background: #eef1e8; border-color: #556a33; }
+.meadow-header .tautan-keranjang .lencana { position: absolute; top: -6px; right: -6px; margin: 0; border: 2px solid #fff; box-sizing: content-box; min-width: 16px; height: 16px; padding: 0 3px; font-size: 10px; }
+.akun-menu { position: relative; }
+.akun-tombol { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 4px 12px 4px 4px; border: 1px solid #dfe3d6; border-radius: 999px; background: #fff; color: #515b47; cursor: pointer; transition: background .15s, border-color .15s; }
+.akun-tombol:hover, .akun-tombol[aria-expanded='true'] { background: #eef1e8; border-color: #556a33; }
+.akun-tombol svg { transition: transform .15s; }
+.akun-tombol[aria-expanded='true'] svg { transform: rotate(180deg); }
+.akun-tombol:focus-visible, .akun-panel a:focus-visible, .akun-panel button:focus-visible { outline: 2px solid #415325; outline-offset: 2px; }
+.akun-panel { position: absolute; top: calc(100% + 8px); right: 0; z-index: 30; display: grid; min-width: 240px; padding: 8px; border: 1px solid #dfe3d6; border-radius: 16px; background: #fff; box-shadow: 0 16px 32px -12px rgba(29, 38, 24, .25); }
+.akun-info { display: grid; gap: 2px; padding: 8px 12px 12px; margin-bottom: 4px; border-bottom: 1px solid #ece9df; }
+.akun-info strong { overflow: hidden; color: #1d2618; font: 600 14px/20px Inter, sans-serif; text-overflow: ellipsis; white-space: nowrap; }
+.akun-info small { color: #515b47; font: 400 12px/16px Inter, sans-serif; }
+.akun-panel a, .akun-panel button { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: #1d2618; font: 500 14px/20px Inter, sans-serif; text-align: left; text-decoration: none; cursor: pointer; transition: background .15s; }
+.akun-panel a:hover, .akun-panel button:hover { background: #eef1e8; }
+.akun-panel button { color: #8a2a21; }
+.akun-panel button:hover { background: #f9eceb; }
+@media (max-width: 1024px) {
+  .meadow-header .aksi-akun { display: none; }
+  .meadow-header .aksi-header { gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .akun-tombol svg { transition: none; } }
