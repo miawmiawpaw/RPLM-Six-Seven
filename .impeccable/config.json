@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-11-26T02:15:32.643Z",
+        "reason": "font bagian dari sistem desain Meadow Rise di Figma (Brand Commitments di PRODUCT.md); keputusan pemilik produk memakai desain Figma"
+      },
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "createdAt": "2026-11-26T02:15:32.759Z",
+        "reason": "font bagian dari sistem desain Meadow Rise di Figma (Brand Commitments di PRODUCT.md); keputusan pemilik produk memakai desain Figma"
+      },
+      {
+        "rule": "overused-font",
+        "value": "instrument serif",
+        "createdAt": "2026-11-26T02:15:32.897Z",
+        "reason": "font bagian dari sistem desain Meadow Rise di Figma (Brand Commitments di PRODUCT.md); keputusan pemilik produk memakai desain Figma"
+      }
+    ]
+  }
+}
