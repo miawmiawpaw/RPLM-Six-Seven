@@ -1793,3 +1793,23 @@ html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 .kat-tombol-garis { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 0 18px; border: 1px solid #556a33; border-radius: 999px; color: #415325; font: 600 14px/20px Inter, sans-serif; text-decoration: none; transition: background .15s; }
 .kat-tombol-garis:hover { background: #eef1e8; }
 .kat-tombol:focus-visible, .kat-tombol-garis:focus-visible { outline: 2px solid #415325; outline-offset: 2px; }
+
+/* ─── Paket Pilihan: kartu mengisi lebar bagian, isi rata bawah ───────────────── */
+.landing-packages .landing-grid-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+.landing-packages .landing-product { display: flex; flex-direction: column; gap: 0; padding: 12px 12px 20px; }
+.landing-packages .landing-product-art { flex: none; height: 220px; }
+.landing-product-body { display: flex; flex: 1; flex-direction: column; gap: 8px; padding: 16px 8px 0; }
+.landing-product-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.landing-product-body h3 { margin: 0; }
+.landing-product-body p { min-height: 0; }
+.landing-product-chip { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
+.landing-product-chip li { padding: 2px 10px; border-radius: 999px; background: #eef1e8; color: #3a4a22; font: 500 12px/20px Inter, sans-serif; }
+.landing-product-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding: 20px 8px 0; }
+.landing-product-body + .landing-product-foot { border-top: 0; }
+.landing-product-foot > strong { font: 600 24px/32px 'Plus Jakarta Sans', sans-serif; white-space: nowrap; }
+.landing-product-foot > strong small { color: #515b47; font: 400 12px/16px Inter, sans-serif; }
+.landing-product-foot .landing-button { width: auto; min-width: 132px; min-height: 44px; }
+@media (max-width: 860px) {
+  .landing-packages .landing-grid-three { grid-template-columns: 1fr; }
+  .landing-packages .landing-product-art { height: 240px; }
+}
