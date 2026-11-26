@@ -3,13 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { rupiah, hariIniIso } from '../utils/format';
 import PemilihTanggal from '../components/PemilihTanggal';
-import tentIcon from '../../assets/Rental Camping/Category/Tent Glyph.svg';
-import carrierIcon from '../../assets/Rental Camping/Category/Carrier Glyph.svg';
-import cookwareIcon from '../../assets/Rental Camping/Category/Cookware Glyph.svg';
-import sleepIcon from '../../assets/Rental Camping/Category/Icon/Sleep Glyph.svg';
+import { fotoPaket } from '../utils/fotoProduk';
 
-/** Ikon ubin kartu per kategori; kategori lain memakai ikon tenda. */
-const IKON_KATEGORI = { Tenda: tentIcon, 'Tas / Carrier': carrierIcon, 'Alat Masak': cookwareIcon, Nesting: sleepIcon };
 const TAB = [
   ['semua', 'Semua Produk'],
   ['item', 'Item Satuan'],
@@ -198,7 +193,7 @@ export default function Katalog() {
                     {bundles.map((paket) => (
                       <li key={paket.bundle_id} className="kat-kartu">
                         <div className="kat-ubin">
-                          <img src={tentIcon} alt="" />
+                          <img src={fotoPaket(paket.nama)} alt="" loading="lazy" />
                           <span className="kat-lencana kat-lencana-gelap">Paket Hemat</span>
                         </div>
                         <small>BUNDLE KOMPLIT</small>
@@ -241,10 +236,11 @@ export default function Katalog() {
                     <ul className="kat-grid">
                       {items.map((alat) => {
                         const dapatDisewa = alat.status_kondisi === 'TERSEDIA';
+                        const foto = alat.media?.find((m) => m.tipe === 'FOTO')?.url;
                         return (
                           <li key={alat.item_id} className="kat-kartu">
-                            <div className="kat-ubin">
-                              <img src={IKON_KATEGORI[alat.kategori] || tentIcon} alt="" />
+                            <div className={foto ? 'kat-ubin' : 'kat-ubin kat-ubin-kosong'}>
+                              {foto && <img src={foto} alt="" loading="lazy" />}
                               <span className="kat-lencana">
                                 {alat.tersedia != null ? `Tersedia: ${alat.tersedia} unit` : `Stok: ${alat.stok_fisik} unit`}
                               </span>

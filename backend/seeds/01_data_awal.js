@@ -86,6 +86,21 @@ exports.seed = async function seed(knex) {
   const semuaAlat = await knex('Item').select('item_id', 'kode_barang');
   const idAlat = Object.fromEntries(semuaAlat.map((a) => [a.kode_barang, a.item_id]));
 
+  // ─── Foto alat ─────────────────────────────────────────────────────────────
+  // Foto dari Figma ("Image Staging"), disajikan frontend dari /photos.
+  // shortcut: bukan object storage (ADR-13); ganti kolom url saat penyedia storage dipilih.
+  const fotoAlat = {
+    'TND-001': 'tentfam', 'TND-002': 'tent2', 'TND-003': 'tents',
+    'TAS-001': 'carrier', 'TAS-002': 'carrier', 'TAS-003': 'carrier',
+    'NES-001': 'cookware', 'MSK-001': 'stove', 'MSK-002': 'stove',
+    'LMP-001': 'lantern', 'LMP-002': 'headlamp',
+  };
+  await knex('ItemMedia').insert(
+    Object.entries(fotoAlat).map(([kode, berkas]) => ({
+      item_id: idAlat[kode], tipe: 'FOTO', url: `/photos/${berkas}.jpg`, urutan: 1,
+    }))
+  );
+
   // ─── Paket bundle ──────────────────────────────────────────────────────────
   // Komposisi mengikuti contoh di SRS §2.2.
   const [bundleDua] = await knex('Bundle').insert({

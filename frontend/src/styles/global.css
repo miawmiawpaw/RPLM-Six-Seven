@@ -1704,9 +1704,11 @@ textarea {
 .kat-kartu h3 a { color: inherit; text-decoration: none; }
 .kat-kartu h3 a:hover { color: #415325; text-decoration: underline; }
 .kat-ket { margin: 0; color: #515b47; font-size: 14px; line-height: 20px; }
-.kat-ubin { position: relative; display: grid; height: 150px; place-items: center; overflow: hidden; border-radius: 16px; background: linear-gradient(#e9ece3, #dce5d8); }
+.kat-ubin { position: relative; display: grid; height: 180px; place-items: center; overflow: hidden; border-radius: 16px; background: linear-gradient(#e9ece3, #dce5d8); }
 .kat-ubin::after { content: ''; position: absolute; right: 0; bottom: 0; left: 0; height: 38%; background: #869b54; clip-path: polygon(0 40%, 30% 10%, 62% 45%, 100% 15%, 100% 100%, 0 100%); opacity: .55; }
-.kat-ubin img { position: relative; z-index: 1; width: 44px; height: 44px; }
+.kat-ubin img { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; }
+.kat-ubin:has(img)::after { display: none; }
+.kat-ubin-kosong { background: linear-gradient(#e9ece3, #dce5d8); }
 .kat-lencana { position: absolute; top: 10px; left: 10px; z-index: 1; padding: 3px 10px; border-radius: 999px; background: #fff; color: #1d2618; font: 600 11px/16px Inter, sans-serif; }
 .kat-lencana-gelap { background: #253019; color: #fff; }
 .kat-chip { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; padding: 0; list-style: none; }

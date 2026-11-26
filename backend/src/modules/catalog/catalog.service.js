@@ -61,10 +61,10 @@ async function cariAlat({ kataKunci, kategori, halaman = 1, batas = 12 } = {}) {
     .limit(batas)
     .offset((halaman - 1) * batas);
 
-  return {
-    data: baris.map(formatItemKatalog),
-    meta: { halaman, batas, total: Number(total.n) },
-  };
+  const media = await ambilMedia(baris.map((b) => Number(b.item_id)));
+  const data = baris.map((b) => ({ ...formatItemKatalog(b), media: media.get(Number(b.item_id)) || [] }));
+
+  return { data, meta: { halaman, batas, total: Number(total.n) } };
 }
 
 function formatItemKatalog(item) {

@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import { useKeranjang } from '../context/CartContext';
 import { rupiah, hariIniIso, durasiHari } from '../utils/format';
 import PemilihTanggal from '../components/PemilihTanggal';
-
 /**
  * Detail alat — REQ-4.2.4, REQ-4.2.5.
  *
